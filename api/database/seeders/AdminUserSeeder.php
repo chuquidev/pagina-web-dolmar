@@ -11,10 +11,10 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::firstOrCreate(
-            ['email' => 'admin@dolmarbikes.com'],
+            ['email' => 'dolmarbikes@gmail.com'],
             [
                 'name' => 'Admin',
-                'password' => Hash::make('Dolmar2026'),
+                'password' => Hash::make('DolmarB2026+'),
             ]
         );
     }
