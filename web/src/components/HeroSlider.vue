@@ -9,6 +9,9 @@ const currentIndex = ref(0)
 let autoplayTimer: ReturnType<typeof setInterval> | null = null
 let touchStartX = 0
 
+const fadeMask =
+    'linear-gradient(to bottom, transparent 0%, black 14%, black 86%, transparent 100%)'
+
 function isExternal(url: string) {
     return url.startsWith('http')
 }
@@ -55,8 +58,9 @@ onUnmounted(stopAutoplay)
             :class="index === currentIndex ? 'z-10 opacity-100' : 'z-0 opacity-0'">
             <template v-if="banner.image">
                 <img :src="banner.image" aria-hidden="true"
-                    class="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl brightness-50" />
-                <img :src="banner.image" :alt="banner.title ?? ''" class="relative h-full w-full object-contain" />
+                    class="absolute inset-0 h-full w-full scale-125 object-cover blur-3xl brightness-75 saturate-75" />
+                <img :src="banner.image" :alt="banner.title ?? ''" class="relative h-full w-full object-contain"
+                    :style="{ maskImage: fadeMask, WebkitMaskImage: fadeMask }" />
             </template>
             <div v-else class="h-full w-full"
                 style="background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-secondary))">
