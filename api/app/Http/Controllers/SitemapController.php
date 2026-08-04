@@ -9,7 +9,7 @@ class SitemapController extends Controller
 {
     public function index()
     {
-        $baseUrl = rtrim(env('FRONTEND_URL'), '/');
+        $baseUrl = rtrim(config('app.frontend_url'), '/');
 
         $urls = collect([
             ['loc' => $baseUrl, 'priority' => '1.0'],
