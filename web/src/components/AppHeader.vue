@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search, ShoppingBag, Menu, X } from '@lucide/vue'
 import { useSettingsStore } from '@/stores/settings'
-import ThemeToggle from './ThemeToggle.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 
 const settingsStore = useSettingsStore()
 const router = useRouter()
@@ -32,6 +32,7 @@ function submitSearch() {
             <nav class="ml-4 hidden gap-6 text-sm font-medium text-gray-600 dark:text-gray-300 md:flex">
                 <RouterLink to="/" class="hover:text-brand-primary">Inicio</RouterLink>
                 <RouterLink to="/catalogo" class="hover:text-brand-primary">Catálogo</RouterLink>
+                <RouterLink to="/nosotros" class="hover:text-brand-primary">Nosotros</RouterLink>
             </nav>
 
             <form
@@ -74,6 +75,9 @@ function submitSearch() {
             <RouterLink to="/catalogo"
                 class="rounded-lg px-3 py-2 hover:bg-gray-50 hover:text-brand-primary dark:hover:bg-gray-800"
                 @click="mobileMenuOpen = false">Catálogo</RouterLink>
+            <RouterLink to="/nosotros"
+                class="rounded-lg px-3 py-2 hover:bg-gray-50 hover:text-brand-primary dark:hover:bg-gray-800"
+                @click="mobileMenuOpen = false">Nosotros</RouterLink>
         </nav>
     </header>
 </template>

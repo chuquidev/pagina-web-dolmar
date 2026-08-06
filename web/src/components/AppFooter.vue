@@ -22,7 +22,7 @@ const currentYear = new Date().getFullYear()
 <template>
     <footer class="border-t border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900">
         <div class="mx-auto max-w-[1400px] px-4 py-10 sm:py-12">
-            <div class="grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-4">
+            <div class="grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-5">
                 <div>
                     <div class="flex items-center gap-2">
                         <img v-if="settingsStore.settings?.logo" :src="settingsStore.settings.logo"
@@ -30,7 +30,7 @@ const currentYear = new Date().getFullYear()
                         <span class="font-display font-semibold text-gray-900 dark:text-gray-100">{{
                             settingsStore.settings?.store_name }}</span>
                     </div>
-                    <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Catálogo online - consulta y compra directo
+                    <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Catálogo online — consulta y compra directo
                         por WhatsApp.</p>
                 </div>
 
@@ -67,6 +67,22 @@ const currentYear = new Date().getFullYear()
                         </li>
                     </ul>
                     <p v-else class="mt-3 text-sm text-gray-400 dark:text-gray-500">No especificado.</p>
+                </div>
+
+                <div>
+                    <h3 class="font-display text-sm font-semibold text-gray-900 dark:text-gray-100">Ayuda</h3>
+                    <ul class="mt-3 space-y-2.5 text-sm text-gray-600 dark:text-gray-400">
+                        <li>
+                            <RouterLink to="/nosotros" class="hover:text-brand-primary">Nosotros</RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink to="/preguntas-frecuentes" class="hover:text-brand-primary">Preguntas frecuentes
+                            </RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink to="/guia-tallas" class="hover:text-brand-primary">Guía de tallas</RouterLink>
+                        </li>
+                    </ul>
                 </div>
 
                 <div>

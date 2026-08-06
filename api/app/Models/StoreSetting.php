@@ -25,17 +25,29 @@ class StoreSetting extends Model implements HasMedia
         'terms_conditions',
         'primary_color',
         'secondary_color',
+        'about_content',
+        'size_guide',
+    ];
+
+    protected $casts = [
+        'size_guide' => 'array',
     ];
 
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('logo')->singleFile();
+        $this->addMediaCollection('about');
     }
 
     public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('logo')
             ->fit(Fit::Max, 512, 512)
+            ->format('webp')
+            ->nonQueued();
+
+        $this->addMediaConversion('gallery')
+            ->fit(Fit::Crop, 800, 600)
             ->format('webp')
             ->nonQueued();
     }

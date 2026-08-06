@@ -6,6 +6,7 @@ import type {
   PaginatedResponse,
   Brand,
   Banner,
+  Faq,
 } from "@/types/catalog";
 
 export interface ProductFilters {
@@ -32,4 +33,5 @@ export const catalogService = {
     api.get<{ data: Product }>(`/products/${slug}`).then((r) => r.data.data),
   getBanners: () =>
     api.get<{ data: Banner[] }>("/banners").then((r) => r.data.data),
+  getFaqs: () => api.get<{ data: Faq[] }>("/faqs").then((r) => r.data.data),
 };

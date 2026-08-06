@@ -20,9 +20,15 @@ class StoreSettingResource extends JsonResource
             'schedule' => $this->schedule,
             'privacy_policy' => $this->privacy_policy,
             'terms_conditions' => $this->terms_conditions,
+            'about_content' => $this->about_content,
+            'size_guide' => $this->size_guide ?? [],
             'primary_color' => $this->primary_color,
             'secondary_color' => $this->secondary_color,
             'logo' => $this->getFirstMediaUrl('logo') ?: null,
+            'about_images' => $this->getMedia('about')->map(fn($m) => [
+                'id' => $m->id,
+                'url' => $m->getUrl('gallery'),
+            ]),
         ];
     }
 }

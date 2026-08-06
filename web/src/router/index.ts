@@ -26,6 +26,21 @@ const router = createRouter({
           props: true,
         },
         {
+          path: "nosotros",
+          name: "about",
+          component: () => import("@/views/AboutView.vue"),
+        },
+        {
+          path: "preguntas-frecuentes",
+          name: "faq",
+          component: () => import("@/views/FaqView.vue"),
+        },
+        {
+          path: "guia-tallas",
+          name: "size-guide",
+          component: () => import("@/views/SizeGuideView.vue"),
+        },
+        {
           path: "politica-privacidad",
           name: "privacy-policy",
           component: () => import("@/views/LegalPageView.vue"),
@@ -74,6 +89,11 @@ const router = createRouter({
           path: "banners",
           name: "admin-banners",
           component: () => import("@/views/admin/BannersView.vue"),
+        },
+        {
+          path: "faqs",
+          name: "admin-faqs",
+          component: () => import("@/views/admin/FaqsView.vue"),
         },
         {
           path: "settings",

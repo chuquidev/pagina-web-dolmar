@@ -8,4 +8,7 @@ export const adminSettingsService = {
       .post<{ data: StoreSettings }>("/admin/settings", formData)
       .then((r) => r.data.data);
   },
+
+  deleteAboutImage: (mediaId: number) =>
+    api.delete(`/admin/settings/about-images/${mediaId}`),
 };

@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\Admin\BannerController as AdminBannerController;
+use App\Http\Controllers\Api\FaqController;
+use App\Http\Controllers\Api\Admin\FaqController as AdminFaqController;
 
 
 Route::post('/v1/admin/login', [AuthController::class, 'login'])
@@ -32,6 +34,9 @@ Route::middleware('auth:sanctum')->prefix('v1/admin')->group(function () {
 
     Route::apiResource('banners', AdminBannerController::class)->except(['show']);
 
+    Route::apiResource('faqs', AdminFaqController::class)->except(['show']);
+    Route::delete('/settings/about-images/{mediaId}', [AdminStoreSettingController::class, 'deleteAboutImage']);
+
     Route::get('/settings', [AdminStoreSettingController::class, 'show']);
     Route::put('/settings', [AdminStoreSettingController::class, 'update']);
     Route::get('/dashboard/stats', [AdminDashboardController::class, 'stats']);
@@ -43,5 +48,6 @@ Route::prefix('v1')->group(function () {
     Route::get('/products', [ProductController::class, 'index']);
     Route::get('/products/{slug}', [ProductController::class, 'show']);
     Route::get('/brands', [BrandController::class, 'index']);
+    Route::get('/faqs', [FaqController::class, 'index']);
     Route::get('/banners', [BannerController::class, 'index']);
 });

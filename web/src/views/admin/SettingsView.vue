@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { ImagePlus } from '@lucide/vue'
+import { ImagePlus, Plus, X as XIcon, Trash2 } from '@lucide/vue'
 import { adminSettingsService } from '@/services/admin/settings.service'
 import { useSettingsStore } from '@/stores/settings'
 import QrCodeGenerator from '@/components/admin/QrCodeGenerator.vue'
+import ConfirmDialog from '@/components/admin/ConfirmDialog.vue'
+import type { SizeGuideRow, AboutImage } from '@/types/catalog'
 
 const siteUrl = window.location.origin
 const settingsStore = useSettingsStore()
@@ -19,11 +21,19 @@ const primaryColor = ref('#1e3a8a')
 const secondaryColor = ref('#3b82f6')
 const privacyPolicy = ref('')
 const termsConditions = ref('')
+const aboutContent = ref('')
+const sizeGuide = ref<SizeGuideRow[]>([])
+const newSizeHeight = ref('')
+const newSizeSize = ref('')
+const existingAboutImages = ref<AboutImage[]>([])
+const newAboutImages = ref<File[]>([])
+const newAboutImagePreviews = ref<string[]>([])
 const newLogo = ref<File | null>(null)
 const newLogoPreview = ref<string | null>(null)
 const saving = ref(false)
 const saved = ref(false)
 const error = ref('')
+const confirmDeleteImageId = ref<number | null>(null)
 
 function loadFromStore() {
     const s = settingsStore.settings
@@ -40,6 +50,9 @@ function loadFromStore() {
     secondaryColor.value = s.secondary_color
     privacyPolicy.value = s.privacy_policy ?? ''
     termsConditions.value = s.terms_conditions ?? ''
+    aboutContent.value = s.about_content ?? ''
+    sizeGuide.value = s.size_guide ? [...s.size_guide] : []
+    existingAboutImages.value = s.about_images ? [...s.about_images] : []
 }
 
 function onLogoSelected(event: Event) {
@@ -47,6 +60,39 @@ function onLogoSelected(event: Event) {
     if (!file) return
     newLogo.value = file
     newLogoPreview.value = URL.createObjectURL(file)
+}
+
+function onAboutImagesSelected(event: Event) {
+    const files = Array.from((event.target as HTMLInputElement).files ?? [])
+    newAboutImages.value.push(...files)
+    newAboutImagePreviews.value.push(...files.map((f) => URL.createObjectURL(f)))
+}
+
+function removeNewAboutImage(index: number) {
+    newAboutImages.value.splice(index, 1)
+    newAboutImagePreviews.value.splice(index, 1)
+}
+
+function requestRemoveAboutImage(mediaId: number) {
+    confirmDeleteImageId.value = mediaId
+}
+
+async function confirmRemoveAboutImage() {
+    if (confirmDeleteImageId.value === null) return
+    await adminSettingsService.deleteAboutImage(confirmDeleteImageId.value)
+    existingAboutImages.value = existingAboutImages.value.filter((img) => img.id !== confirmDeleteImageId.value)
+    confirmDeleteImageId.value = null
+}
+
+function addSizeRow() {
+    if (!newSizeHeight.value.trim() || !newSizeSize.value.trim()) return
+    sizeGuide.value.push({ height: newSizeHeight.value.trim(), size: newSizeSize.value.trim() })
+    newSizeHeight.value = ''
+    newSizeSize.value = ''
+}
+
+function removeSizeRow(index: number) {
+    sizeGuide.value.splice(index, 1)
 }
 
 async function submit() {
@@ -65,15 +111,24 @@ async function submit() {
         if (schedule.value) formData.append('schedule', schedule.value)
         if (privacyPolicy.value) formData.append('privacy_policy', privacyPolicy.value)
         if (termsConditions.value) formData.append('terms_conditions', termsConditions.value)
+        if (aboutContent.value) formData.append('about_content', aboutContent.value)
         formData.append('primary_color', primaryColor.value)
         formData.append('secondary_color', secondaryColor.value)
         if (newLogo.value) formData.append('logo', newLogo.value)
+        newAboutImages.value.forEach((file) => formData.append('about_images[]', file))
+        sizeGuide.value.forEach((row, i) => {
+            formData.append(`size_guide[${i}][height]`, row.height)
+            formData.append(`size_guide[${i}][size]`, row.size)
+        })
 
         const updated = await adminSettingsService.update(formData)
         settingsStore.settings = updated
         settingsStore.applyTheme()
         newLogo.value = null
         newLogoPreview.value = null
+        newAboutImages.value = []
+        newAboutImagePreviews.value = []
+        existingAboutImages.value = updated.about_images
         saved.value = true
         setTimeout(() => (saved.value = false), 2500)
     } catch {
@@ -95,7 +150,7 @@ onMounted(async () => {
         </h1>
 
         <form
-            class="mt-6 max-w-8xl space-y-6 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6"
+            class="mt-6 max-w-4xl space-y-6 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6"
             @submit.prevent="submit">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Logo</label>
@@ -186,6 +241,100 @@ onMounted(async () => {
             </div>
 
             <div class="border-t border-gray-200 pt-6 dark:border-gray-800">
+                <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Sobre nosotros</h2>
+                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Se muestra en la página pública "Nosotros".</p>
+
+                <div class="mt-4">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
+                    <textarea v-model="aboutContent" rows="6"
+                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"></textarea>
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Separa los párrafos con una línea en blanco
+                        entre ellos.</p>
+                </div>
+
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fotos</label>
+
+                    <div v-if="existingAboutImages.length" class="mt-2 flex flex-wrap gap-2">
+                        <div v-for="img in existingAboutImages" :key="img.id"
+                            class="group relative h-20 w-20 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                            <img :src="img.url" class="h-full w-full object-cover" />
+                            <button type="button"
+                                class="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 transition group-hover:opacity-100"
+                                @click="requestRemoveAboutImage(img.id)">
+                                <Trash2 class="h-5 w-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="newAboutImagePreviews.length" class="mt-2 flex flex-wrap gap-2">
+                        <div v-for="(preview, i) in newAboutImagePreviews" :key="preview"
+                            class="group relative h-20 w-20 overflow-hidden rounded-lg border-2 border-brand-primary/40">
+                            <img :src="preview" class="h-full w-full object-cover" />
+                            <button type="button"
+                                class="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 transition group-hover:opacity-100"
+                                @click="removeNewAboutImage(i)">
+                                <Trash2 class="h-5 w-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <label for="about-images-input"
+                        class="mt-2 flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-6 text-sm text-gray-500 transition hover:border-brand-primary hover:text-brand-primary dark:border-gray-700 dark:text-gray-400">
+                        <ImagePlus class="h-5 w-5" />
+                        Haz clic para subir fotos
+                    </label>
+                    <input id="about-images-input" type="file" accept="image/*" multiple class="hidden"
+                        @change="onAboutImagesSelected" />
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200 pt-6 dark:border-gray-800">
+                <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Guía de tallas</h2>
+                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Se muestra en la página pública "Guía de
+                    tallas".</p>
+
+                <div v-if="sizeGuide.length"
+                    class="mt-4 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                    <table class="w-full text-left text-sm">
+                        <thead
+                            class="bg-gray-50 text-xs font-semibold uppercase text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                            <tr>
+                                <th class="px-3 py-2">Estatura</th>
+                                <th class="px-3 py-2">Talla</th>
+                                <th class="px-3 py-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                            <tr v-for="(row, i) in sizeGuide" :key="i">
+                                <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ row.height }}</td>
+                                <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ row.size }}</td>
+                                <td class="px-3 py-2 text-right">
+                                    <button type="button" class="text-gray-400 hover:text-red-500"
+                                        @click="removeSizeRow(i)">
+                                        <XIcon class="h-4 w-4" />
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3 flex flex-wrap gap-2">
+                    <input v-model="newSizeHeight" type="text" placeholder="Ej: 150 - 160 cm"
+                        class="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                    <input v-model="newSizeSize" type="text" placeholder="Ej: S (15&quot;)"
+                        class="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                        @keydown.enter.prevent="addSizeRow" />
+                    <button type="button"
+                        class="rounded-lg border border-gray-300 px-3 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                        @click="addSizeRow">
+                        <Plus class="h-4 w-4" />
+                    </button>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200 pt-6 dark:border-gray-800">
                 <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Contenido legal</h2>
                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Se muestra en las páginas públicas de política
                     de privacidad y términos y condiciones.</p>
@@ -196,10 +345,7 @@ onMounted(async () => {
                             privacidad</label>
                         <textarea v-model="privacyPolicy" rows="8"
                             class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"></textarea>
-                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Separa los párrafos con una línea en
-                            blanco entre ellos.</p>
                     </div>
-
                     <div>
                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Términos y
                             condiciones</label>
@@ -221,5 +367,9 @@ onMounted(async () => {
                 </button>
             </div>
         </form>
+
+        <ConfirmDialog v-if="confirmDeleteImageId !== null" title="Eliminar foto"
+            message="¿Eliminar esta foto? Esta acción no se puede deshacer." @confirm="confirmRemoveAboutImage"
+            @cancel="confirmDeleteImageId = null" />
     </div>
 </template>

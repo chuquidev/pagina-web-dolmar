@@ -1,31 +1,74 @@
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" href="/favicon.ico" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dolmar Bikes</title>
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
 
-  <script>
-    (function () {
-      var section =
-        location.pathname.indexOf("/admin") === 0 ? "admin" : "public";
-      var stored = localStorage.getItem("theme-" + section);
-      var prefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)",
-      ).matches;
-      if (stored === "dark" || (!stored && prefersDark)) {
-        document.documentElement.classList.add("dark");
-      }
-    })();
-  </script>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
-    rel="stylesheet"
-  />
-</head>
-<body class="bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">
-  <div id="app"></div>
-  <script type="module" src="/src/main.ts"></script>
-</body>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dolmar Bikes — Bicicletas, repuestos y accesorios en Chiclayo</title>
+    <meta
+      name="description"
+      content="Dolmar Bikes: bicicletas, repuestos y accesorios en Chiclayo, Perú. Consulta precios y disponibilidad y compra directo"
+    />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Dolmar Bikes" />
+    <meta
+      property="og:title"
+      content="Dolmar Bikes — Bicicletas, repuestos y accesorios en Chiclayo"
+    />
+    <meta
+      property="og:description"
+      content="Dolmar Bikes: bicicletas, repuestos y accesorios en Chiclayo, Perú. Consulta precios y disponibilidad y compra directo"
+    />
+    <meta property="og:url" content="https://dolmarbike.com" />
+    <meta
+      property="og:image"
+      content="https://dolmarbike.com/pwa-512x512.png"
+    />
+    <meta property="og:locale" content="es_PE" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Dolmar Bike — Bicicletas, repuestos y accesorios en Chiclayo"
+    />
+    <meta
+      name="twitter:description"
+      content="Catálogo Dolmar Bikes: bicicletas, repuestos y accesorios en Chiclayo, Perú."
+    />
+    <meta
+      name="twitter:image"
+      content="https://dolmarbike.com/pwa-512x512.png"
+    />
+
+    <script>
+      (function () {
+        var section =
+          location.pathname.indexOf("/admin") === 0 ? "admin" : "public";
+        var stored = localStorage.getItem("theme-" + section);
+        var prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        if (stored === "dark" || (!stored && prefersDark)) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

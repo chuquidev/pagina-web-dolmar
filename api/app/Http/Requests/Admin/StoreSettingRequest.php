@@ -24,9 +24,15 @@ class StoreSettingRequest extends FormRequest
             'schedule' => ['nullable', 'string', 'max:255'],
             'privacy_policy' => ['nullable', 'string'],
             'terms_conditions' => ['nullable', 'string'],
+            'about_content' => ['nullable', 'string'],
+            'size_guide' => ['nullable', 'array'],
+            'size_guide.*.height' => ['required_with:size_guide', 'string', 'max:100'],
+            'size_guide.*.size' => ['required_with:size_guide', 'string', 'max:100'],
             'primary_color' => ['nullable', 'string', 'max:7'],
             'secondary_color' => ['nullable', 'string', 'max:7'],
             'logo' => ['nullable', 'image', 'max:2048'],
+            'about_images' => ['nullable', 'array'],
+            'about_images.*' => ['image', 'max:4096'],
         ];
     }
 }

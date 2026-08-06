@@ -60,9 +60,30 @@ export interface StoreSettings {
   schedule: string | null;
   privacy_policy: string | null;
   terms_conditions: string | null;
+  about_content: string | null;
+  size_guide: SizeGuideRow[];
+  about_images: AboutImage[];
   primary_color: string;
   secondary_color: string;
   logo: string | null;
+}
+
+export interface Faq {
+  id: number;
+  question: string;
+  answer: string;
+  order: number;
+  is_active: boolean;
+}
+
+export interface SizeGuideRow {
+  height: string;
+  size: string;
+}
+
+export interface AboutImage {
+  id: number;
+  url: string;
 }
 
 export interface PaginatedResponse<T> {
