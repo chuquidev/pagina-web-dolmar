@@ -128,7 +128,7 @@ async function submit() {
         newLogoPreview.value = null
         newAboutImages.value = []
         newAboutImagePreviews.value = []
-        existingAboutImages.value = updated.about_images
+        existingAboutImages.value = updated.about_images ?? []
         saved.value = true
         setTimeout(() => (saved.value = false), 2500)
     } catch {
