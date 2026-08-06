@@ -82,6 +82,17 @@ const router = createRouter({
         },
       ],
     },
+    {
+      path: "/:pathMatch(.*)*",
+      component: () => import("@/layouts/PublicLayout.vue"),
+      children: [
+        {
+          path: "",
+          name: "not-found",
+          component: () => import("@/views/NotFoundView.vue"),
+        },
+      ],
+    },
   ],
   scrollBehavior: () => ({ top: 0 }),
 });

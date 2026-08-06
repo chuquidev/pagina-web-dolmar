@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { X } from '@lucide/vue'
 import { catalogService, type ProductFilters } from '@/services/catalog.service'
 import { useCatalogStore } from '@/stores/catalog'
 import ProductCard from '@/components/ProductCard.vue'
+import SkeletonCard from '@/components/SkeletonCard.vue'
+import Breadcrumbs from '@/components/Breadcrumbs.vue'
 import type { Product } from '@/types/catalog'
 
 const route = useRoute()
@@ -22,6 +24,16 @@ const sortOptions = [
     { value: 'price_desc', label: 'Precio: mayor a menor' },
     { value: 'name', label: 'Nombre A-Z' },
 ]
+
+const breadcrumbItems = computed(() => {
+    const items: { label: string; to?: string }[] = [{ label: 'Inicio', to: '/' }, { label: 'Catálogo', to: '/catalogo' }]
+    const categorySlug = route.query.category as string | undefined
+    if (categorySlug) {
+        const category = catalogStore.categories.find((c) => c.slug === categorySlug)
+        if (category) items.push({ label: category.name })
+    }
+    return items
+})
 
 async function loadProducts() {
     loading.value = true
@@ -51,6 +63,8 @@ watch(() => route.query, loadProducts, { immediate: true, deep: true })
 
 <template>
     <div class="mx-auto max-w-[1400px] px-4 py-6 sm:py-8">
+        <Breadcrumbs :items="breadcrumbItems" />
+
         <h1 class="font-display text-xl font-bold text-gray-900 dark:text-gray-100 sm:text-2xl">Catálogo</h1>
 
         <div class="mt-5 flex flex-wrap items-center gap-2 sm:mt-6 sm:gap-3">
@@ -84,7 +98,9 @@ watch(() => route.query, loadProducts, { immediate: true, deep: true })
             </span>
         </div>
 
-        <div v-if="loading" class="py-24 text-center text-gray-400 dark:text-gray-500">Cargando productos...</div>
+        <div v-if="loading" class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+            <SkeletonCard v-for="n in 10" :key="n" />
+        </div>
         <div v-else-if="!products.length" class="py-24 text-center text-gray-400 dark:text-gray-500">
             No encontramos productos con esos filtros.
         </div>

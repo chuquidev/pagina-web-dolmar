@@ -1,19 +1,23 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
 import { useCatalogStore } from '@/stores/catalog'
 import HeroSlider from '@/components/HeroSlider.vue'
 import CategoryCard from '@/components/CategoryCard.vue'
 import ProductCard from '@/components/ProductCard.vue'
+import SkeletonCard from '@/components/SkeletonCard.vue'
 
 const settingsStore = useSettingsStore()
 const catalogStore = useCatalogStore()
+
+const loading = computed(() => !catalogStore.loaded)
 </script>
 
 <template>
     <div>
         <HeroSlider v-if="catalogStore.banners.length" :banners="catalogStore.banners" />
 
-        <section v-else class="relative overflow-hidden py-16 text-white sm:py-20 lg:py-28">
+        <section v-else-if="!loading" class="relative overflow-hidden py-16 text-white sm:py-20 lg:py-28">
             <div class="absolute inset-0"
                 style="background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-secondary))">
             </div>
@@ -34,28 +38,44 @@ const catalogStore = useCatalogStore()
             </div>
         </section>
 
-        <section v-if="catalogStore.categories.length" class="mx-auto max-w-[1400px] px-4 py-10 sm:py-12">
-            <div class="flex items-center gap-2">
-                <h2
-                    class="font-display text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-gray-100 sm:text-xl">
-                    Conoce nuestras categorías</h2>
-            </div>
-            <div class="mt-6 flex flex-wrap gap-4 sm:gap-5">
-                <CategoryCard v-for="category in catalogStore.categories" :key="category.id" :category="category"
-                    class="w-[calc(50%-0.5rem)] sm:w-[226px] lg:w-[280px]" />
-            </div>
-        </section>
-
-        <section v-if="catalogStore.featuredProducts.length" class="mx-auto max-w-[1400px] px-4 pb-12 sm:pb-16">
-            <h2 class="font-display text-lg font-semibold text-gray-900 dark:text-gray-100 sm:text-xl">DESTACADOS</h2>
+        <section v-if="loading" class="mx-auto max-w-[1400px] px-4 py-10 sm:py-12">
+            <div class="h-6 w-40 animate-pulse rounded bg-gray-200 dark:bg-gray-800"></div>
             <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
-                <ProductCard v-for="product in catalogStore.featuredProducts" :key="product.id" :product="product" />
+                <SkeletonCard v-for="n in 5" :key="n" />
             </div>
         </section>
 
-        <div v-if="!catalogStore.featuredProducts.length && !catalogStore.categories.length"
-            class="mx-auto max-w-[1400px] px-4 py-24 text-center text-gray-400 dark:text-gray-500">
-            Aún no hay productos publicados.
-        </div>
+        <template v-else>
+            <section v-if="catalogStore.categories.length" class="mx-auto max-w-[1400px] px-4 py-10 sm:py-12">
+                <div class="flex items-center gap-2">
+                    <span class="flex gap-0.5">
+                        <span class="h-5 w-1.5 -skew-x-12 bg-brand-primary"></span>
+                        <span class="h-5 w-1.5 -skew-x-12 bg-brand-primary"></span>
+                        <span class="h-5 w-1.5 -skew-x-12 bg-brand-primary"></span>
+                    </span>
+                    <h2
+                        class="font-display text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-gray-100 sm:text-xl">
+                        Conoce nuestras categorías</h2>
+                </div>
+                <div class="mt-6 flex flex-wrap gap-4 sm:gap-5">
+                    <CategoryCard v-for="category in catalogStore.categories" :key="category.id" :category="category"
+                        class="w-[calc(50%-0.5rem)] sm:w-[190px] lg:w-[220px]" />
+                </div>
+            </section>
+
+            <section v-if="catalogStore.featuredProducts.length" class="mx-auto max-w-[1400px] px-4 pb-12 sm:pb-16">
+                <h2 class="font-display text-lg font-semibold text-gray-900 dark:text-gray-100 sm:text-xl">Destacados
+                </h2>
+                <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+                    <ProductCard v-for="product in catalogStore.featuredProducts" :key="product.id"
+                        :product="product" />
+                </div>
+            </section>
+
+            <div v-if="!catalogStore.featuredProducts.length && !catalogStore.categories.length"
+                class="mx-auto max-w-[1400px] px-4 py-24 text-center text-gray-400 dark:text-gray-500">
+                Aún no hay productos publicados.
+            </div>
+        </template>
     </div>
 </template>
