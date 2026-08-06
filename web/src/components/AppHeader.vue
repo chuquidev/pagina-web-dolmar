@@ -24,7 +24,7 @@ function submitSearch() {
         <div class="mx-auto flex max-w-[1400px] items-center gap-4 px-4 py-3">
             <RouterLink to="/" class="flex min-w-0 items-center gap-2 font-bold text-brand-primary">
                 <img v-if="settingsStore.settings?.logo" :src="settingsStore.settings.logo"
-                    :alt="settingsStore.settings.store_name" class="h-9 w-9 shrink-0 rounded object-contain" />
+                    :alt="settingsStore.settings.store_name" class="h-12 w-12 shrink-0 rounded object-contain" />
                 <ShoppingBag v-else class="h-7 w-7 shrink-0" />
                 <span class="truncate">{{ settingsStore.settings?.store_name ?? 'Cargando...' }}</span>
             </RouterLink>

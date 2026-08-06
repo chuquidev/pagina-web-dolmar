@@ -26,7 +26,7 @@ const currentYear = new Date().getFullYear()
                 <div>
                     <div class="flex items-center gap-2">
                         <img v-if="settingsStore.settings?.logo" :src="settingsStore.settings.logo"
-                            :alt="settingsStore.settings.store_name" class="h-9 w-9 rounded object-contain" />
+                            :alt="settingsStore.settings.store_name" class="h-12 w-12 rounded object-contain" />
                         <span class="font-display font-semibold text-gray-900 dark:text-gray-100">{{
                             settingsStore.settings?.store_name }}</span>
                     </div>
