@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Package } from '@lucide/vue'
+import { Package, Maximize2 } from '@lucide/vue'
 import type { ProductImage } from '@/types/catalog'
 import DiscountBadge from './DiscountBadge.vue'
+import ProductLightbox from './ProductLightbox.vue'
 
 defineProps<{
     images: ProductImage[]
@@ -11,12 +12,20 @@ defineProps<{
     salePrice?: string | null
 }>()
 const activeIndex = ref(0)
+const lightboxOpen = ref(false)
 </script>
 
 <template>
     <div>
         <div class="relative aspect-square overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800">
-            <img v-if="images.length" :src="images[activeIndex].large" :alt="alt" class="h-full w-full object-cover" />
+            <button v-if="images.length" class="relative h-full w-full" aria-label="Ver imagen ampliada"
+                @click="lightboxOpen = true">
+                <img :src="images[activeIndex].large" :alt="alt" class="h-full w-full cursor-zoom-in object-cover" />
+                <span
+                    class="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white">
+                    <Maximize2 class="h-4 w-4" />
+                </span>
+            </button>
             <div v-else class="flex h-full w-full items-center justify-center text-gray-300 dark:text-gray-600">
                 <Package class="h-16 w-16" />
             </div>
@@ -31,5 +40,8 @@ const activeIndex = ref(0)
                 <img :src="image.thumb" :alt="`${alt} ${index + 1}`" class="h-full w-full object-cover" />
             </button>
         </div>
+
+        <ProductLightbox v-if="lightboxOpen" :images="images" v-model="activeIndex" :alt="alt"
+            @close="lightboxOpen = false" />
     </div>
 </template>

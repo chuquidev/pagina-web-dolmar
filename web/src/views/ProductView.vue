@@ -11,6 +11,7 @@ import PriceTag from '@/components/PriceTag.vue'
 import AvailabilityBadge from '@/components/AvailabilityBadge.vue'
 import Breadcrumbs from '@/components/Breadcrumbs.vue'
 import SkeletonProductDetail from '@/components/SkeletonProductDetail.vue'
+import ProductCard from '@/components/ProductCard.vue'
 import type { Product } from '@/types/catalog'
 import { useHead } from '@unhead/vue'
 
@@ -19,6 +20,7 @@ const settingsStore = useSettingsStore()
 const router = useRouter()
 
 const product = ref<Product | null>(null)
+const relatedProducts = ref<Product[]>([])
 const notFound = ref(false)
 const loading = ref(true)
 const copied = ref(false)
@@ -44,16 +46,26 @@ const breadcrumbItems = computed(() => {
     ]
 })
 
+const isOutOfStock = computed(() => product.value?.availability === 'out_of_stock')
+
 async function loadProduct() {
     loading.value = true
     notFound.value = false
+    relatedProducts.value = []
     try {
         product.value = await catalogService.getProductBySlug(props.slug)
+        loadRelatedProducts()
     } catch {
         notFound.value = true
     } finally {
         loading.value = false
     }
+}
+
+async function loadRelatedProducts() {
+    if (!product.value) return
+    const response = await catalogService.getProducts({ category: product.value.category.slug, sort: 'newest' })
+    relatedProducts.value = response.data.filter((p) => p.id !== product.value?.id).slice(0, 4)
 }
 
 function goBack() {
@@ -66,10 +78,10 @@ function goBack() {
 
 const whatsappUrl = computed(() => {
     if (!product.value || !settingsStore.settings?.whatsapp_number) return null
-    return buildWhatsAppUrl(
-        settingsStore.settings.whatsapp_number,
-        `Hola, me interesa este producto: ${product.value.name}.\n${window.location.href}`
-    )
+    const message = isOutOfStock.value
+        ? `Hola, quiero que me avisen cuando esté disponible este producto: ${product.value.name}.\n${window.location.href}`
+        : `Hola, me interesa este producto: ${product.value.name}.\n${window.location.href}`
+    return buildWhatsAppUrl(settingsStore.settings.whatsapp_number, message)
 })
 
 async function share() {
@@ -142,7 +154,7 @@ watch(() => props.slug, loadProduct)
                                 <path
                                     d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.79.47 3.43 1.29 4.9L2 22l5.29-1.39c1.4.76 3 1.2 4.7 1.2h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.05h-.01c-1.6 0-3.15-.43-4.5-1.24l-.32-.19-3.13.82.84-3.05-.21-.32a8.02 8.02 0 0 1-1.24-4.26c0-4.46 3.63-8.09 8.09-8.09 4.46 0 8.09 3.63 8.09 8.09 0 4.46-3.63 8.05-8.11 8.05zm4.44-6.02c-.24-.12-1.44-.71-1.66-.79-.22-.08-.38-.12-.55.12-.16.24-.62.79-.76.95-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.92-1.18-.71-.63-1.19-1.41-1.33-1.65-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.42-.55-.42-.14 0-.3-.02-.46-.02s-.42.06-.64.3c-.22.24-.85.83-.85 2.02 0 1.19.87 2.34 1 2.5.12.16 1.71 2.61 4.15 3.66.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28z" />
                             </svg>
-                            Consultar por WhatsApp
+                            {{ isOutOfStock ? 'Avísame cuando esté disponible' : 'Consultar por WhatsApp' }}
                         </a>
 
                         <button
@@ -155,6 +167,15 @@ watch(() => props.slug, loadProduct)
                     </div>
                 </div>
             </div>
+
+            <section v-if="relatedProducts.length" class="mt-16">
+                <h2 class="font-display text-lg font-semibold text-gray-900 dark:text-gray-100 sm:text-xl">También te
+                    puede
+                    interesar</h2>
+                <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+                    <ProductCard v-for="related in relatedProducts" :key="related.id" :product="related" />
+                </div>
+            </section>
         </template>
     </div>
 </template>

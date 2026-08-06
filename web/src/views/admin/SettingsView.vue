@@ -150,7 +150,7 @@ onMounted(async () => {
         </h1>
 
         <form
-            class="mt-6 max-w-4xl space-y-6 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6"
+            class="mt-6 max-w-7xl space-y-6 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6"
             @submit.prevent="submit">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Logo</label>
