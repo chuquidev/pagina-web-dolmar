@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /admin
 
-Sitemap: https://dolmarbike.com/sitemap.xml
+Sitemap: https://api.dolmarbike.com/sitemap.xml
