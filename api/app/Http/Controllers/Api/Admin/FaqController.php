@@ -23,7 +23,7 @@ class FaqController extends Controller
         }
 
         return FaqResource::collection(
-            $query->orderBy('order')->paginate(15)->appends($request->query())
+            $query->orderBy('order')->paginate(12)->appends($request->query())
         );
     }
 

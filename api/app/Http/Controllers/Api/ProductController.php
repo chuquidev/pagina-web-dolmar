@@ -38,7 +38,7 @@ class ProductController extends Controller
             default => $query->latest(),
         };
 
-        return ProductResource::collection($query->paginate(12));
+        return ProductResource::collection($query->paginate(20));
     }
 
     public function show(string $slug)

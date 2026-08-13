@@ -23,7 +23,7 @@ class BrandController extends Controller
         }
 
         return BrandResource::collection(
-            $query->orderBy('name')->paginate(15)->appends($request->query())
+            $query->orderBy('name')->paginate(12)->appends($request->query())
         );
     }
 

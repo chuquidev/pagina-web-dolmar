@@ -23,7 +23,7 @@ class CategoryController extends Controller
         }
 
         return CategoryResource::collection(
-            $query->orderBy('order')->paginate(15)->appends($request->query())
+            $query->orderBy('order')->paginate(12)->appends($request->query())
         );
     }
 

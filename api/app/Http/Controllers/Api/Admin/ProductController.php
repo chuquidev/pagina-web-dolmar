@@ -31,7 +31,7 @@ class ProductController extends Controller
         }
 
         return ProductResource::collection(
-            $query->latest()->paginate(15)->appends($request->query())
+            $query->latest()->paginate(12)->appends($request->query())
         );
     }
 

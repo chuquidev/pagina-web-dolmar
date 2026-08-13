@@ -23,7 +23,7 @@ class BannerController extends Controller
         }
 
         return BannerResource::collection(
-            $query->orderBy('order')->paginate(15)->appends($request->query())
+            $query->orderBy('order')->paginate(12)->appends($request->query())
         );
     }
 
