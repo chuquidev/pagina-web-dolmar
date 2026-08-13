@@ -15,6 +15,10 @@ const loading = computed(() => !catalogStore.loaded)
 
 <template>
     <div>
+        <h1 class="sr-only">
+            {{ settingsStore.settings?.store_name ? `${settingsStore.settings.store_name} — Bicicletas, repuestos y
+            accesorios en Chiclayo` : 'Bicicletas, repuestos y accesorios en Chiclayo' }}
+        </h1>
         <HeroSlider v-if="catalogStore.banners.length" :banners="catalogStore.banners" />
 
         <section v-else-if="!loading" class="relative overflow-hidden py-16 text-white sm:py-20 lg:py-28">

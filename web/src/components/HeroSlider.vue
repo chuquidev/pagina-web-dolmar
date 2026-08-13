@@ -62,9 +62,8 @@ onUnmounted(stopAutoplay)
 
             <div class="absolute inset-0 flex items-center justify-center px-4 text-center text-white">
                 <div class="max-w-2xl">
-                    <h1 v-if="banner.title"
-                        class="font-display text-base font-bold leading-tight sm:text-2xl lg:text-4xl">{{ banner.title
-                        }}</h1>
+                    <p v-if="banner.title" class="font-display text-xl font-bold leading-tight sm:text-3xl lg:text-5xl">
+                        {{ banner.title }}</p>
                     <p v-if="banner.subtitle"
                         class="mx-auto mt-1 hidden max-w-xl text-xs text-white/85 sm:mt-2 sm:block sm:text-sm lg:mt-3 lg:text-base">
                         {{ banner.subtitle }}</p>
