@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search, ShoppingBag, Menu, X } from '@lucide/vue'
+import { Search, ShoppingBag, ShoppingCart, Menu, X } from '@lucide/vue'
 import { useSettingsStore } from '@/stores/settings'
+import { useCartStore } from '@/stores/cart'
 import ThemeToggle from '@/components/ThemeToggle.vue'
+import CartDrawer from '@/components/CartDrawer.vue'
 
 const settingsStore = useSettingsStore()
+const cartStore = useCartStore()
 const router = useRouter()
 const search = ref('')
 const mobileMenuOpen = ref(false)
 const mobileSearchOpen = ref(false)
+const cartOpen = ref(false)
 
 function submitSearch() {
     if (!search.value.trim()) return
@@ -24,7 +28,7 @@ function submitSearch() {
         <div class="mx-auto flex max-w-[1400px] items-center gap-4 px-4 py-3">
             <RouterLink to="/" class="flex min-w-0 items-center gap-2 font-bold text-brand-primary">
                 <img v-if="settingsStore.settings?.logo" :src="settingsStore.settings.logo"
-                    :alt="settingsStore.settings.store_name" class="h-12 w-12 shrink-0 rounded object-contain" />
+                    :alt="settingsStore.settings.store_name" class="h-9 w-9 shrink-0 rounded object-contain" />
                 <ShoppingBag v-else class="h-7 w-7 shrink-0" />
                 <span class="truncate">{{ settingsStore.settings?.store_name ?? 'Cargando...' }}</span>
             </RouterLink>
@@ -43,9 +47,28 @@ function submitSearch() {
                     class="w-full bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100" />
             </form>
 
+            <button
+                class="relative hidden rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 md:block"
+                aria-label="Ver carrito" @click="cartOpen = true">
+                <ShoppingCart class="h-5 w-5" />
+                <span v-if="cartStore.totalItems"
+                    class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-primary px-1 text-[10px] font-bold text-white">
+                    {{ cartStore.totalItems }}
+                </span>
+            </button>
+
             <ThemeToggle class="hidden md:block" />
 
             <div class="ml-auto flex items-center gap-1 md:hidden">
+                <button
+                    class="relative rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                    aria-label="Ver carrito" @click="cartOpen = true">
+                    <ShoppingCart class="h-5 w-5" />
+                    <span v-if="cartStore.totalItems"
+                        class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-primary px-1 text-[10px] font-bold text-white">
+                        {{ cartStore.totalItems }}
+                    </span>
+                </button>
                 <ThemeToggle />
                 <button class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                     @click="mobileSearchOpen = !mobileSearchOpen; mobileMenuOpen = false">
@@ -79,5 +102,7 @@ function submitSearch() {
                 class="rounded-lg px-3 py-2 hover:bg-gray-50 hover:text-brand-primary dark:hover:bg-gray-800"
                 @click="mobileMenuOpen = false">Nosotros</RouterLink>
         </nav>
+
+        <CartDrawer v-if="cartOpen" @close="cartOpen = false" />
     </header>
 </template>

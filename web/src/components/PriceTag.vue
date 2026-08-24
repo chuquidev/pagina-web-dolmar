@@ -1,15 +1,10 @@
 <script setup lang="ts">
+import { formatCurrency } from '@/utils/currency'
+
 defineProps<{
     price: string
     salePrice?: string | null
 }>()
-
-function formatCurrency(value: string | number): string {
-    return new Intl.NumberFormat('es-PE', {
-        style: 'currency',
-        currency: 'PEN',
-    }).format(Number(value))
-}
 </script>
 
 <template>

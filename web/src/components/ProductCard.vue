@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Package, Eye } from '@lucide/vue'
+import { computed, ref } from 'vue'
+import { Package, Eye, ShoppingCart, Check } from '@lucide/vue'
 import type { Product } from '@/types/catalog'
 import { useSettingsStore } from '@/stores/settings'
+import { useCartStore } from '@/stores/cart'
 import { buildWhatsAppUrl } from '@/utils/whatsapp'
 import PriceTag from './PriceTag.vue'
 import AvailabilityBadge from './AvailabilityBadge.vue'
@@ -10,6 +11,8 @@ import DiscountBadge from './DiscountBadge.vue'
 
 const props = defineProps<{ product: Product }>()
 const settingsStore = useSettingsStore()
+const cartStore = useCartStore()
+const justAdded = ref(false)
 
 const image = computed(() => props.product.images[0]?.thumb ?? null)
 
@@ -19,6 +22,12 @@ const quickWhatsappUrl = computed(() => {
     const productUrl = `${window.location.origin}/producto/${props.product.slug}`
     return buildWhatsAppUrl(phone, `Hola, me interesa este producto: ${props.product.name}.\n${productUrl}`)
 })
+
+function addToCart() {
+    cartStore.addItem(props.product, 1)
+    justAdded.value = true
+    setTimeout(() => (justAdded.value = false), 1200)
+}
 </script>
 
 <template>
@@ -44,6 +53,13 @@ const quickWhatsappUrl = computed(() => {
                     Ver
                 </span>
             </div>
+
+            <button aria-label="Agregar al carrito"
+                class="absolute bottom-2 left-2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-brand-primary text-white shadow-md transition-transform hover:scale-110"
+                @click.stop.prevent="addToCart">
+                <Check v-if="justAdded" class="h-4 w-4" />
+                <ShoppingCart v-else class="h-4 w-4" />
+            </button>
 
             <a v-if="quickWhatsappUrl" :href="quickWhatsappUrl" target="_blank" rel="noopener"
                 aria-label="Consultar por WhatsApp" class="absolute bottom-2 right-2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-[#25D366]

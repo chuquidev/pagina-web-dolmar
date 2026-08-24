@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Share2, Check, ArrowLeft } from '@lucide/vue'
+import { Share2, Check, ArrowLeft, ShoppingCart, Plus, Minus } from '@lucide/vue'
 import { catalogService } from '@/services/catalog.service'
 import { useSettingsStore } from '@/stores/settings'
+import { useCartStore } from '@/stores/cart'
 import { buildWhatsAppUrl } from '@/utils/whatsapp'
 import { canGoBack } from '@/router'
 import ProductGallery from '@/components/ProductGallery.vue'
@@ -17,6 +18,7 @@ import { useHead } from '@unhead/vue'
 
 const props = defineProps<{ slug: string }>()
 const settingsStore = useSettingsStore()
+const cartStore = useCartStore()
 const router = useRouter()
 
 const product = ref<Product | null>(null)
@@ -24,6 +26,8 @@ const relatedProducts = ref<Product[]>([])
 const notFound = ref(false)
 const loading = ref(true)
 const copied = ref(false)
+const quantity = ref(1)
+const justAdded = ref(false)
 
 useHead(() => ({
     title: product.value ? `${product.value.name} — ${settingsStore.settings?.store_name ?? ''}` : 'Producto',
@@ -52,6 +56,7 @@ async function loadProduct() {
     loading.value = true
     notFound.value = false
     relatedProducts.value = []
+    quantity.value = 1
     try {
         product.value = await catalogService.getProductBySlug(props.slug)
         loadRelatedProducts()
@@ -74,6 +79,13 @@ function goBack() {
     } else {
         router.push('/catalogo')
     }
+}
+
+function addToCart() {
+    if (!product.value) return
+    cartStore.addItem(product.value, quantity.value)
+    justAdded.value = true
+    setTimeout(() => (justAdded.value = false), 1500)
 }
 
 const whatsappUrl = computed(() => {
@@ -145,8 +157,24 @@ watch(() => props.slug, loadProduct)
                         </li>
                     </ul>
 
-                    <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                    <div class="mt-8 flex items-center gap-3">
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad</span>
+                        <div class="flex items-center gap-2">
+                            <button
+                                class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                                @click="quantity = Math.max(1, quantity - 1)">
+                                <Minus class="h-3.5 w-3.5" />
+                            </button>
+                            <span class="w-8 text-center text-sm text-gray-900 dark:text-gray-100">{{ quantity }}</span>
+                            <button
+                                class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                                @click="quantity++">
+                                <Plus class="h-3.5 w-3.5" />
+                            </button>
+                        </div>
+                    </div>
 
+                    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                         <a v-if="whatsappUrl" :href="whatsappUrl" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3 font-display
                         font-semibold
                         text-white transition hover:brightness-95">
@@ -156,6 +184,14 @@ watch(() => props.slug, loadProduct)
                             </svg>
                             {{ isOutOfStock ? 'Avísame cuando esté disponible' : 'Consultar por WhatsApp' }}
                         </a>
+
+                        <button
+                            class="flex items-center justify-center gap-2 rounded-full border border-brand-primary px-6 py-3 font-display font-semibold text-brand-primary transition hover:bg-brand-primary/5"
+                            @click="addToCart">
+                            <Check v-if="justAdded" class="h-5 w-5" />
+                            <ShoppingCart v-else class="h-5 w-5" />
+                            {{ justAdded ? 'Agregado al carrito' : 'Agregar al carrito' }}
+                        </button>
 
                         <button
                             class="flex items-center justify-center gap-2 rounded-full border border-gray-200 px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
