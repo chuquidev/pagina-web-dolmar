@@ -7,6 +7,8 @@ import type {
   Brand,
   Banner,
   Faq,
+  MaintenanceAppointment,
+  MaintenanceService,
 } from "@/types/catalog";
 
 export interface ProductFilters {
@@ -34,4 +36,30 @@ export const catalogService = {
   getBanners: () =>
     api.get<{ data: Banner[] }>("/banners").then((r) => r.data.data),
   getFaqs: () => api.get<{ data: Faq[] }>("/faqs").then((r) => r.data.data),
+
+  getMaintenanceServices: () =>
+    api
+      .get<{ data: MaintenanceService[] }>("/maintenance/services")
+      .then((r) => r.data.data),
+
+  getMaintenanceAvailability: (serviceId: number, date: string) =>
+    api
+      .get<{
+        slots: string[];
+      }>("/maintenance/availability", { params: { service_id: serviceId, date } })
+      .then((r) => r.data.slots),
+
+  createAppointment: (payload: {
+    maintenance_service_id: number;
+    date: string;
+    time: string;
+    customer_name: string;
+    customer_phone: string;
+    bike_info?: string;
+  }) =>
+    api
+      .post<{
+        data: MaintenanceAppointment;
+      }>("/maintenance/appointments", payload)
+      .then((r) => r.data.data),
 };

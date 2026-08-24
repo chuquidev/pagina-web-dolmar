@@ -52,6 +52,11 @@ const router = createRouter({
           component: () => import("@/views/LegalPageView.vue"),
           props: { field: "terms_conditions", title: "Términos y condiciones" },
         },
+        {
+          path: "reservar-mantenimiento",
+          name: "maintenance-booking",
+          component: () => import("@/views/MaintenanceBookingView.vue"),
+        },
       ],
     },
     {
@@ -99,6 +104,22 @@ const router = createRouter({
           path: "settings",
           name: "admin-settings",
           component: () => import("@/views/admin/SettingsView.vue"),
+        },
+        {
+          path: "maintenance-services",
+          name: "admin-maintenance-services",
+          component: () => import("@/views/admin/MaintenanceServicesView.vue"),
+        },
+        {
+          path: "maintenance-schedule",
+          name: "admin-maintenance-schedule",
+          component: () => import("@/views/admin/MaintenanceSettingsView.vue"),
+        },
+        {
+          path: "appointments",
+          name: "admin-appointments",
+          component: () =>
+            import("@/views/admin/MaintenanceAppointmentsView.vue"),
         },
       ],
     },

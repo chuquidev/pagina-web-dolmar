@@ -37,6 +37,7 @@ function submitSearch() {
                 <RouterLink to="/" class="hover:text-brand-primary">Inicio</RouterLink>
                 <RouterLink to="/catalogo" class="hover:text-brand-primary">Catálogo</RouterLink>
                 <RouterLink to="/nosotros" class="hover:text-brand-primary">Nosotros</RouterLink>
+                <RouterLink to="/reservar-mantenimiento" class="hover:text-brand-primary">Mantenimiento</RouterLink>
             </nav>
 
             <form
@@ -101,6 +102,9 @@ function submitSearch() {
             <RouterLink to="/nosotros"
                 class="rounded-lg px-3 py-2 hover:bg-gray-50 hover:text-brand-primary dark:hover:bg-gray-800"
                 @click="mobileMenuOpen = false">Nosotros</RouterLink>
+            <RouterLink to="/reservar-mantenimiento"
+                class="rounded-lg px-3 py-2 hover:bg-gray-50 hover:text-brand-primary dark:hover:bg-gray-800"
+                @click="mobileMenuOpen = false">Mantenimiento</RouterLink>
         </nav>
 
         <CartDrawer v-if="cartOpen" @close="cartOpen = false" />

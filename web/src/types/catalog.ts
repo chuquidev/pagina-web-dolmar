@@ -90,3 +90,48 @@ export interface PaginatedResponse<T> {
   data: T[];
   meta: { current_page: number; last_page: number; total: number };
 }
+
+export interface MaintenanceService {
+  id: number;
+  name: string;
+  description: string | null;
+  duration_minutes: number;
+  price: string | null;
+  is_active: boolean;
+  order: number;
+}
+
+export type DayKey =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday";
+
+export interface MaintenanceSettings {
+  business_hours: Record<DayKey, { open: string; close: string } | null>;
+  capacity: number;
+  slot_interval_minutes: number;
+  advance_booking_days: number;
+  min_notice_hours: number;
+}
+
+export type AppointmentStatus =
+  | "pending"
+  | "confirmed"
+  | "cancelled"
+  | "completed";
+
+export interface MaintenanceAppointment {
+  id: number;
+  service: MaintenanceService;
+  customer_name: string;
+  customer_phone: string;
+  bike_info: string | null;
+  starts_at: string;
+  ends_at: string;
+  status: AppointmentStatus;
+  created_at: string;
+}

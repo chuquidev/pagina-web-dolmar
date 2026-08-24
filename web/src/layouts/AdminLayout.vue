@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { LayoutDashboard, Package, FolderTree, Tags, Image as ImageIcon, HelpCircle, Settings, LogOut, Menu, X } from '@lucide/vue'
+import { LayoutDashboard, Package, FolderTree, Tags, Image as ImageIcon, HelpCircle, Settings, LogOut, Menu, X, Wrench, Clock, Calendar } from '@lucide/vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
@@ -23,6 +23,9 @@ const navItems = [
     { to: '/admin/banners', label: 'Banners', icon: ImageIcon },
     { to: '/admin/faqs', label: 'Preguntas frecuentes', icon: HelpCircle },
     { to: '/admin/settings', label: 'Configuración', icon: Settings },
+    { to: '/admin/maintenance-services', label: 'Servicios', icon: Wrench },
+    { to: '/admin/maintenance-schedule', label: 'Horarios', icon: Clock },
+    { to: '/admin/appointments', label: 'Citas', icon: Calendar },
 ]
 
 async function confirmLogout() {
