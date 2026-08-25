@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
 
-defineProps<{
-    title: string
-    message: string
-}>()
+withDefaults(
+    defineProps<{
+        title: string
+        message: string
+        confirmLabel?: string
+        variant?: 'danger' | 'primary'
+    }>(),
+    { confirmLabel: 'Eliminar', variant: 'danger' }
+)
 const emit = defineEmits<{ confirm: []; cancel: [] }>()
 </script>
 
@@ -17,10 +22,10 @@ const emit = defineEmits<{ confirm: []; cancel: [] }>()
                 @click="emit('cancel')">
                 Cancelar
             </button>
-            <button type="button"
-                class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+            <button type="button" class="rounded-lg px-4 py-2 text-sm font-semibold text-white transition"
+                :class="variant === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-brand-primary hover:brightness-110'"
                 @click="emit('confirm')">
-                Eliminar
+                {{ confirmLabel }}
             </button>
         </div>
     </Modal>
