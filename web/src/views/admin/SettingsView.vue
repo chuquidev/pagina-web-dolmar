@@ -3,12 +3,17 @@ import { onMounted, ref } from 'vue'
 import { ImagePlus, Plus, X as XIcon, Trash2 } from '@lucide/vue'
 import { adminSettingsService } from '@/services/admin/settings.service'
 import { useSettingsStore } from '@/stores/settings'
+import { useToastStore } from '@/stores/toast'
+import { useFormErrors } from '@/composables/useFormErrors'
 import QrCodeGenerator from '@/components/admin/QrCodeGenerator.vue'
 import ConfirmDialog from '@/components/admin/ConfirmDialog.vue'
 import type { SizeGuideRow, AboutImage } from '@/types/catalog'
 
 const siteUrl = window.location.origin
 const settingsStore = useSettingsStore()
+const toastStore = useToastStore()
+const { getError, parseErrors, clearErrors } = useFormErrors()
+
 const storeName = ref('')
 const whatsappNumber = ref('')
 const email = ref('')
@@ -31,8 +36,6 @@ const newAboutImagePreviews = ref<string[]>([])
 const newLogo = ref<File | null>(null)
 const newLogoPreview = ref<string | null>(null)
 const saving = ref(false)
-const saved = ref(false)
-const error = ref('')
 const confirmDeleteImageId = ref<number | null>(null)
 
 function loadFromStore() {
@@ -82,6 +85,7 @@ async function confirmRemoveAboutImage() {
     await adminSettingsService.deleteAboutImage(confirmDeleteImageId.value)
     existingAboutImages.value = existingAboutImages.value.filter((img) => img.id !== confirmDeleteImageId.value)
     confirmDeleteImageId.value = null
+    toastStore.success('Foto eliminada.')
 }
 
 function addSizeRow() {
@@ -97,8 +101,7 @@ function removeSizeRow(index: number) {
 
 async function submit() {
     saving.value = true
-    saved.value = false
-    error.value = ''
+    clearErrors()
     try {
         const formData = new FormData()
         formData.append('store_name', storeName.value)
@@ -129,10 +132,9 @@ async function submit() {
         newAboutImages.value = []
         newAboutImagePreviews.value = []
         existingAboutImages.value = updated.about_images ?? []
-        saved.value = true
-        setTimeout(() => (saved.value = false), 2500)
-    } catch {
-        error.value = 'No se pudo guardar la configuración.'
+        toastStore.success('Configuración guardada.')
+    } catch (err) {
+        toastStore.error(parseErrors(err))
     } finally {
         saving.value = false
     }
@@ -150,7 +152,7 @@ onMounted(async () => {
         </h1>
 
         <form
-            class="mt-6 max-w-7xl space-y-6 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6"
+            class="mt-6 max-w-4xl space-y-6 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6"
             @submit.prevent="submit">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Logo</label>
@@ -168,23 +170,34 @@ onMounted(async () => {
                     </label>
                     <input id="logo-input" type="file" accept="image/*" class="hidden" @change="onLogoSelected" />
                 </div>
+                <p v-if="getError('logo')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('logo') }}
+                </p>
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre de la tienda</label>
                     <input v-model="storeName" type="text" required
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('store_name') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('store_name')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('store_name') }}</p>
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">WhatsApp</label>
                     <input v-model="whatsappNumber" type="text" required placeholder="51987654321"
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('whatsapp_number') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('whatsapp_number')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('whatsapp_number') }}</p>
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Correo de contacto</label>
                     <input v-model="email" type="email" placeholder="contacto@dolmarbikes.com"
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('email') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('email')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('email')
+                    }}</p>
                 </div>
             </div>
 
@@ -192,17 +205,26 @@ onMounted(async () => {
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Facebook (URL)</label>
                     <input v-model="facebookUrl" type="url" placeholder="https://facebook.com/tutienda"
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('facebook_url') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('facebook_url')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('facebook_url') }}</p>
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Instagram (URL)</label>
                     <input v-model="instagramUrl" type="url" placeholder="https://instagram.com/tutienda"
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('instagram_url') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('instagram_url')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('instagram_url') }}</p>
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">TikTok (URL)</label>
                     <input v-model="tiktokUrl" type="url" placeholder="https://tiktok.com/@tutienda"
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('tiktok_url') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('tiktok_url')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('tiktok_url') }}</p>
                 </div>
             </div>
 
@@ -354,9 +376,6 @@ onMounted(async () => {
                     </div>
                 </div>
             </div>
-
-            <p v-if="error" class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
-            <p v-if="saved" class="text-sm text-green-600 dark:text-green-400">Cambios guardados.</p>
 
             <QrCodeGenerator :default-value="siteUrl" />
 

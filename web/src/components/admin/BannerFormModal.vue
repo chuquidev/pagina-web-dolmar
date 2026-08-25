@@ -3,10 +3,15 @@ import { ref, watch } from 'vue'
 import { ImagePlus } from '@lucide/vue'
 import Modal from './Modal.vue'
 import { adminBannersService } from '@/services/admin/banners.service'
+import { useToastStore } from '@/stores/toast'
+import { useFormErrors } from '@/composables/useFormErrors'
 import type { Banner } from '@/types/catalog'
 
 const props = defineProps<{ banner: Banner | null }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
+
+const toastStore = useToastStore()
+const { getError, parseErrors, clearErrors } = useFormErrors()
 
 const title = ref('')
 const subtitle = ref('')
@@ -17,7 +22,6 @@ const isActive = ref(true)
 const newImage = ref<File | null>(null)
 const newImagePreview = ref<string | null>(null)
 const saving = ref(false)
-const error = ref('')
 
 watch(
     () => props.banner,
@@ -30,6 +34,7 @@ watch(
         isActive.value = banner?.is_active ?? true
         newImage.value = null
         newImagePreview.value = null
+        clearErrors()
     },
     { immediate: true }
 )
@@ -43,7 +48,7 @@ function onImageSelected(event: Event) {
 
 async function submit() {
     saving.value = true
-    error.value = ''
+    clearErrors()
     try {
         const formData = new FormData()
         if (title.value) formData.append('title', title.value)
@@ -60,8 +65,8 @@ async function submit() {
             await adminBannersService.create(formData)
         }
         emit('saved')
-    } catch {
-        error.value = 'No se pudo guardar el banner.'
+    } catch (err) {
+        toastStore.error(parseErrors(err))
     } finally {
         saving.value = false
     }
@@ -88,6 +93,8 @@ async function submit() {
                     <input id="banner-image-input" type="file" accept="image/*" class="hidden"
                         @change="onImageSelected" />
                 </div>
+                <p v-if="getError('image')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('image') }}
+                </p>
                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Recomendado: imagen horizontal, mínimo
                     1600×700px.</p>
             </div>
@@ -132,8 +139,6 @@ async function submit() {
                     class="rounded border-gray-300 text-brand-primary dark:border-gray-600 dark:bg-gray-800" />
                 Banner activo
             </label>
-
-            <p v-if="error" class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
 
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button"

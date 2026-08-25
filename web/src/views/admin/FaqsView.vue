@@ -4,7 +4,10 @@ import { Plus, Pencil, Trash2, Search } from '@lucide/vue'
 import { adminFaqsService } from '@/services/admin/faqs.service'
 import FaqFormModal from '@/components/admin/FaqFormModal.vue'
 import ConfirmDialog from '@/components/admin/ConfirmDialog.vue'
+import { useToastStore } from '@/stores/toast'
 import type { Faq } from '@/types/catalog'
+
+const toastStore = useToastStore()
 
 const faqs = ref<Faq[]>([])
 const total = ref(0)
@@ -49,6 +52,7 @@ function openEdit(faq: Faq) {
 }
 async function handleSaved() {
     showModal.value = false
+    toastStore.success(editingFaq.value ? 'Pregunta actualizada.' : 'Pregunta creada.')
     await load(currentPage.value, { silent: true })
 }
 function requestDelete(faq: Faq) {
@@ -62,6 +66,7 @@ async function confirmDelete() {
     const index = faqs.value.findIndex((f) => f.id === id)
     if (index !== -1) faqs.value.splice(index, 1)
     total.value = Math.max(0, total.value - 1)
+    toastStore.success('Pregunta eliminada.')
     if (!faqs.value.length && currentPage.value > 1) {
         await load(currentPage.value - 1)
     }

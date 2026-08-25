@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { adminMaintenanceSettingsService } from '@/services/admin/maintenance.service'
+import { useToastStore } from '@/stores/toast'
+import { useFormErrors } from '@/composables/useFormErrors'
 import type { MaintenanceSettings, DayKey } from '@/types/catalog'
+
+const toastStore = useToastStore()
+const { getError, parseErrors, clearErrors } = useFormErrors()
 
 const days: { key: DayKey; label: string }[] = [
     { key: 'monday', label: 'Lunes' },
@@ -28,8 +33,6 @@ const advanceBookingDays = ref(14)
 const minNoticeHours = ref(2)
 const loading = ref(true)
 const saving = ref(false)
-const saved = ref(false)
-const error = ref('')
 
 function toggleDay(day: DayKey, open: boolean) {
     hours.value[day] = open ? { open: '09:00', close: '19:00' } : null
@@ -48,8 +51,7 @@ async function load() {
 
 async function submit() {
     saving.value = true
-    saved.value = false
-    error.value = ''
+    clearErrors()
     try {
         const payload: MaintenanceSettings = {
             business_hours: hours.value,
@@ -59,10 +61,9 @@ async function submit() {
             min_notice_hours: minNoticeHours.value,
         }
         await adminMaintenanceSettingsService.update(payload)
-        saved.value = true
-        setTimeout(() => (saved.value = false), 2500)
-    } catch {
-        error.value = 'No se pudo guardar la configuración.'
+        toastStore.success('Horarios guardados.')
+    } catch (err) {
+        toastStore.error(parseErrors(err))
     } finally {
         saving.value = false
     }
@@ -105,13 +106,20 @@ onMounted(load)
                         <span v-else class="text-sm text-gray-400 dark:text-gray-500">Cerrado</span>
                     </div>
                 </div>
+                <p v-if="getError('business_hours')" class="mt-2 text-xs text-red-600 dark:text-red-400">{{
+                    getError('business_hours')
+                    }}</p>
             </div>
 
             <div class="grid gap-4 border-t border-gray-200 pt-6 dark:border-gray-800 sm:grid-cols-2">
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Capacidad simultánea</label>
                     <input v-model.number="capacity" type="number" min="1" required
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('capacity') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('capacity')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('capacity') }}
+                    </p>
                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Cuántas bicicletas puedes atender al mismo
                         tiempo
                         (número de mecánicos/espacios).</p>
@@ -120,7 +128,10 @@ onMounted(load)
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Intervalo entre horarios
                         (minutos)</label>
                     <input v-model.number="slotIntervalMinutes" type="number" min="5" step="5" required
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('slot_interval_minutes') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('slot_interval_minutes')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('slot_interval_minutes') }}</p>
                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Ej: cada 30 minutos aparece un horario
                         nuevo para
                         elegir.</p>
@@ -129,7 +140,10 @@ onMounted(load)
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Días de anticipación
                         permitidos</label>
                     <input v-model.number="advanceBookingDays" type="number" min="1" required
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('advance_booking_days') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('advance_booking_days')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('advance_booking_days') }}</p>
                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Hasta cuántos días a futuro puede reservar
                         un cliente.
                     </p>
@@ -137,15 +151,15 @@ onMounted(load)
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Aviso mínimo (horas)</label>
                     <input v-model.number="minNoticeHours" type="number" min="0" required
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('min_notice_hours') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('min_notice_hours')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('min_notice_hours') }}</p>
                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">No se pueden reservar horarios más cercanos
                         a esto
                         desde ahora.</p>
                 </div>
             </div>
-
-            <p v-if="error" class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
-            <p v-if="saved" class="text-sm text-green-600 dark:text-green-400">Cambios guardados.</p>
 
             <div class="flex justify-end">
                 <button type="submit" :disabled="saving"

@@ -4,7 +4,10 @@ import { Plus, Pencil, Trash2, Eye, Search, Package } from '@lucide/vue'
 import { adminCategoriesService } from '@/services/admin/categories.service'
 import CategoryFormModal from '@/components/admin/CategoryFormModal.vue'
 import ConfirmDialog from '@/components/admin/ConfirmDialog.vue'
+import { useToastStore } from '@/stores/toast'
 import type { Category } from '@/types/catalog'
+
+const toastStore = useToastStore()
 
 const categories = ref<Category[]>([])
 const total = ref(0)
@@ -13,7 +16,6 @@ const lastPage = ref(1)
 const loading = ref(true)
 const showModal = ref(false)
 const editingCategory = ref<Category | null>(null)
-const deleteError = ref('')
 const confirmDeleteCategory = ref<Category | null>(null)
 
 const search = ref('')
@@ -34,34 +36,28 @@ async function load(page = 1, opts: { silent?: boolean } = {}) {
 }
 
 let searchTimeout: ReturnType<typeof setTimeout>
-
 watch(search, () => {
     clearTimeout(searchTimeout)
     searchTimeout = setTimeout(() => load(1), 350)
 })
-
 watch(status, () => load(1))
 
 function openCreate() {
     editingCategory.value = null
     showModal.value = true
 }
-
 function openEdit(category: Category) {
     editingCategory.value = category
     showModal.value = true
 }
-
 async function handleSaved() {
     showModal.value = false
+    toastStore.success(editingCategory.value ? 'Categoría actualizada.' : 'Categoría creada.')
     await load(currentPage.value, { silent: true })
 }
-
 function requestDelete(category: Category) {
-    deleteError.value = ''
     confirmDeleteCategory.value = category
 }
-
 async function confirmDelete() {
     if (!confirmDeleteCategory.value) return
     const id = confirmDeleteCategory.value.id
@@ -70,12 +66,13 @@ async function confirmDelete() {
         const index = categories.value.findIndex((c) => c.id === id)
         if (index !== -1) categories.value.splice(index, 1)
         total.value = Math.max(0, total.value - 1)
+        toastStore.success('Categoría eliminada.')
         if (!categories.value.length && currentPage.value > 1) {
             await load(currentPage.value - 1)
         }
     } catch (err) {
         const axiosError = err as { response?: { data?: { message?: string } } }
-        deleteError.value = axiosError.response?.data?.message ?? 'No se pudo eliminar la categoría.'
+        toastStore.error(axiosError.response?.data?.message ?? 'No se pudo eliminar la categoría.')
     } finally {
         confirmDeleteCategory.value = null
     }
@@ -114,10 +111,6 @@ onMounted(() => load())
             </select>
         </div>
 
-        <p v-if="deleteError"
-            class="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400">{{
-                deleteError }}</p>
-
         <div class="mt-6 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[560px] text-left text-sm">
@@ -144,7 +137,7 @@ onMounted(() => load())
                             <tr v-for="category in categories" :key="category.id">
                                 <td class="px-4 py-3">
                                     <div
-                                        class="h-12 w-12 overflow-hidden rounded-xl border border-gray-100 bg-gray-100 dark:border-gray-700 dark:bg-gray-800">
+                                        class="h-12 w-12 overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800">
                                         <img v-if="category.image" :src="category.image" :alt="category.name"
                                             loading="lazy" class="h-full w-full object-cover" />
                                         <div v-else

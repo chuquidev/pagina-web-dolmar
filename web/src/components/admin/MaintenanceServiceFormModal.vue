@@ -2,10 +2,15 @@
 import { ref, watch } from 'vue'
 import Modal from './Modal.vue'
 import { adminMaintenanceServicesService } from '@/services/admin/maintenance.service'
+import { useToastStore } from '@/stores/toast'
+import { useFormErrors } from '@/composables/useFormErrors'
 import type { MaintenanceService } from '@/types/catalog'
 
 const props = defineProps<{ service: MaintenanceService | null }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
+
+const toastStore = useToastStore()
+const { getError, parseErrors, clearErrors } = useFormErrors()
 
 const name = ref('')
 const description = ref('')
@@ -14,7 +19,6 @@ const price = ref('')
 const isActive = ref(true)
 const order = ref(0)
 const saving = ref(false)
-const error = ref('')
 
 watch(
     () => props.service,
@@ -25,13 +29,14 @@ watch(
         price.value = service?.price ?? ''
         isActive.value = service?.is_active ?? true
         order.value = service?.order ?? 0
+        clearErrors()
     },
     { immediate: true }
 )
 
 async function submit() {
     saving.value = true
-    error.value = ''
+    clearErrors()
     try {
         const payload = {
             name: name.value,
@@ -47,8 +52,8 @@ async function submit() {
             await adminMaintenanceServicesService.create(payload)
         }
         emit('saved')
-    } catch {
-        error.value = 'No se pudo guardar el servicio.'
+    } catch (err) {
+        toastStore.error(parseErrors(err))
     } finally {
         saving.value = false
     }
@@ -61,7 +66,10 @@ async function submit() {
             <div>
                 <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
                 <input v-model="name" type="text" required placeholder="Ej: Mantenimiento básico"
-                    class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                    class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                    :class="getError('name') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                <p v-if="getError('name')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('name') }}
+                </p>
             </div>
 
             <div>
@@ -74,7 +82,10 @@ async function submit() {
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Duración (minutos)</label>
                     <input v-model.number="durationMinutes" type="number" min="5" step="5" required
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('duration_minutes') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('duration_minutes')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('duration_minutes') }}</p>
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Precio referencial
@@ -95,8 +106,6 @@ async function submit() {
                     class="rounded border-gray-300 text-brand-primary dark:border-gray-600 dark:bg-gray-800" />
                 Servicio activo
             </label>
-
-            <p v-if="error" class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
 
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button"

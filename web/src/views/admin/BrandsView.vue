@@ -4,7 +4,10 @@ import { Plus, Pencil, Trash2, Eye, Search } from '@lucide/vue'
 import { adminBrandsService } from '@/services/admin/brands.service'
 import BrandFormModal from '@/components/admin/BrandFormModal.vue'
 import ConfirmDialog from '@/components/admin/ConfirmDialog.vue'
+import { useToastStore } from '@/stores/toast'
 import type { Brand } from '@/types/catalog'
+
+const toastStore = useToastStore()
 
 const brands = ref<Brand[]>([])
 const total = ref(0)
@@ -13,7 +16,6 @@ const lastPage = ref(1)
 const loading = ref(true)
 const showModal = ref(false)
 const editingBrand = ref<Brand | null>(null)
-const deleteError = ref('')
 const confirmDeleteBrand = ref<Brand | null>(null)
 
 const search = ref('')
@@ -34,34 +36,28 @@ async function load(page = 1, opts: { silent?: boolean } = {}) {
 }
 
 let searchTimeout: ReturnType<typeof setTimeout>
-
 watch(search, () => {
     clearTimeout(searchTimeout)
     searchTimeout = setTimeout(() => load(1), 350)
 })
-
 watch(status, () => load(1))
 
 function openCreate() {
     editingBrand.value = null
     showModal.value = true
 }
-
 function openEdit(brand: Brand) {
     editingBrand.value = brand
     showModal.value = true
 }
-
 async function handleSaved() {
     showModal.value = false
+    toastStore.success(editingBrand.value ? 'Marca actualizada.' : 'Marca creada.')
     await load(currentPage.value, { silent: true })
 }
-
 function requestDelete(brand: Brand) {
-    deleteError.value = ''
     confirmDeleteBrand.value = brand
 }
-
 async function confirmDelete() {
     if (!confirmDeleteBrand.value) return
     const id = confirmDeleteBrand.value.id
@@ -70,12 +66,13 @@ async function confirmDelete() {
         const index = brands.value.findIndex((b) => b.id === id)
         if (index !== -1) brands.value.splice(index, 1)
         total.value = Math.max(0, total.value - 1)
+        toastStore.success('Marca eliminada.')
         if (!brands.value.length && currentPage.value > 1) {
             await load(currentPage.value - 1)
         }
     } catch (err) {
         const axiosError = err as { response?: { data?: { message?: string } } }
-        deleteError.value = axiosError.response?.data?.message ?? 'No se pudo eliminar la marca.'
+        toastStore.error(axiosError.response?.data?.message ?? 'No se pudo eliminar la marca.')
     } finally {
         confirmDeleteBrand.value = null
     }
@@ -114,10 +111,6 @@ onMounted(() => load())
             </select>
         </div>
 
-        <p v-if="deleteError"
-            class="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400">{{
-                deleteError }}</p>
-
         <div class="mt-6 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[480px] text-left text-sm">
@@ -149,7 +142,6 @@ onMounted(() => load())
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex justify-end gap-2">
-
                                         <a :href="`/catalogo?brand=${brand.slug}`" target="_blank" rel="noopener" class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400
                                         dark:hover:bg-gray-800" title="Ver productos de esta marca">
                                             <Eye class="h-4 w-4" />

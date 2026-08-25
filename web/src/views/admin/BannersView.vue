@@ -4,7 +4,10 @@ import { Plus, Pencil, Trash2, Search, ImageOff } from '@lucide/vue'
 import { adminBannersService } from '@/services/admin/banners.service'
 import BannerFormModal from '@/components/admin/BannerFormModal.vue'
 import ConfirmDialog from '@/components/admin/ConfirmDialog.vue'
+import { useToastStore } from '@/stores/toast'
 import type { Banner } from '@/types/catalog'
+
+const toastStore = useToastStore()
 
 const banners = ref<Banner[]>([])
 const total = ref(0)
@@ -49,6 +52,7 @@ function openEdit(banner: Banner) {
 }
 async function handleSaved() {
     showModal.value = false
+    toastStore.success(editingBanner.value ? 'Banner actualizado.' : 'Banner creado.')
     await load(currentPage.value, { silent: true })
 }
 function requestDelete(banner: Banner) {
@@ -62,6 +66,7 @@ async function confirmDelete() {
     const index = banners.value.findIndex((b) => b.id === id)
     if (index !== -1) banners.value.splice(index, 1)
     total.value = Math.max(0, total.value - 1)
+    toastStore.success('Banner eliminado.')
     if (!banners.value.length && currentPage.value > 1) {
         await load(currentPage.value - 1)
     }
@@ -174,7 +179,7 @@ onMounted(() => load())
 
         <BannerFormModal v-if="showModal" :banner="editingBanner" @close="showModal = false" @saved="handleSaved" />
         <ConfirmDialog v-if="confirmDeleteBanner" title="Eliminar banner"
-            :message="`¿Eliminar este banner? Esta acción no se puede deshacer.`" @confirm="confirmDelete"
+            message="¿Eliminar este banner? Esta acción no se puede deshacer." @confirm="confirmDelete"
             @cancel="confirmDeleteBanner = null" />
     </div>
 </template>

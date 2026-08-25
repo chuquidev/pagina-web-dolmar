@@ -4,7 +4,10 @@ import { Plus, Pencil, Trash2, Search } from '@lucide/vue'
 import { adminMaintenanceServicesService } from '@/services/admin/maintenance.service'
 import MaintenanceServiceFormModal from '@/components/admin/MaintenanceServiceFormModal.vue'
 import ConfirmDialog from '@/components/admin/ConfirmDialog.vue'
+import { useToastStore } from '@/stores/toast'
 import type { MaintenanceService } from '@/types/catalog'
+
+const toastStore = useToastStore()
 
 const services = ref<MaintenanceService[]>([])
 const total = ref(0)
@@ -13,7 +16,6 @@ const lastPage = ref(1)
 const loading = ref(true)
 const showModal = ref(false)
 const editingService = ref<MaintenanceService | null>(null)
-const deleteError = ref('')
 const confirmDeleteService = ref<MaintenanceService | null>(null)
 
 const search = ref('')
@@ -50,10 +52,10 @@ function openEdit(service: MaintenanceService) {
 }
 async function handleSaved() {
     showModal.value = false
+    toastStore.success(editingService.value ? 'Servicio actualizado.' : 'Servicio creado.')
     await load(currentPage.value, { silent: true })
 }
 function requestDelete(service: MaintenanceService) {
-    deleteError.value = ''
     confirmDeleteService.value = service
 }
 async function confirmDelete() {
@@ -64,12 +66,13 @@ async function confirmDelete() {
         const index = services.value.findIndex((s) => s.id === id)
         if (index !== -1) services.value.splice(index, 1)
         total.value = Math.max(0, total.value - 1)
+        toastStore.success('Servicio eliminado.')
         if (!services.value.length && currentPage.value > 1) {
             await load(currentPage.value - 1)
         }
     } catch (err) {
         const axiosError = err as { response?: { data?: { message?: string } } }
-        deleteError.value = axiosError.response?.data?.message ?? 'No se pudo eliminar el servicio.'
+        toastStore.error(axiosError.response?.data?.message ?? 'No se pudo eliminar el servicio.')
     } finally {
         confirmDeleteService.value = null
     }
@@ -115,10 +118,6 @@ onMounted(() => load())
                 <option value="inactive">Inactivos</option>
             </select>
         </div>
-
-        <p v-if="deleteError"
-            class="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400">{{
-            deleteError }}</p>
 
         <div class="mt-6 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
             <div class="overflow-x-auto">

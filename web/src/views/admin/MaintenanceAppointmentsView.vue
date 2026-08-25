@@ -3,8 +3,11 @@ import { onMounted, ref, watch } from 'vue'
 import { Search, Trash2, MessageCircle } from '@lucide/vue'
 import { adminMaintenanceAppointmentsService } from '@/services/admin/maintenance.service'
 import ConfirmDialog from '@/components/admin/ConfirmDialog.vue'
+import { useToastStore } from '@/stores/toast'
 import { buildWhatsAppUrl } from '@/utils/whatsapp'
 import type { MaintenanceAppointment, AppointmentStatus } from '@/types/catalog'
+
+const toastStore = useToastStore()
 
 const appointments = ref<MaintenanceAppointment[]>([])
 const total = ref(0)
@@ -22,6 +25,13 @@ const statusStyles: Record<AppointmentStatus, string> = {
     confirmed: 'bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400',
     cancelled: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
     completed: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400',
+}
+
+const statusLabels: Record<AppointmentStatus, string> = {
+    pending: 'Pendiente',
+    confirmed: 'Confirmada',
+    cancelled: 'Cancelada',
+    completed: 'Completada',
 }
 
 async function load(page = 1, opts: { silent?: boolean } = {}) {
@@ -50,6 +60,7 @@ async function changeStatus(appointment: MaintenanceAppointment, newStatus: stri
     const updated = await adminMaintenanceAppointmentsService.updateStatus(appointment.id, newStatus as AppointmentStatus)
     const index = appointments.value.findIndex((a) => a.id === appointment.id)
     if (index !== -1) appointments.value[index] = updated
+    toastStore.info(`Cita marcada como "${statusLabels[updated.status]}".`)
 }
 
 function requestDelete(appointment: MaintenanceAppointment) {
@@ -63,6 +74,7 @@ async function confirmDelete() {
     const index = appointments.value.findIndex((a) => a.id === id)
     if (index !== -1) appointments.value.splice(index, 1)
     total.value = Math.max(0, total.value - 1)
+    toastStore.success('Cita eliminada.')
 }
 
 function whatsappLink(appointment: MaintenanceAppointment) {
@@ -154,15 +166,9 @@ onMounted(() => load())
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex justify-end gap-2">
-                                        <a
-                                        :href="whatsappLink(appointment)"
-                                        target="_blank"
-                                        rel="noopener"
-                                        class="rounded-lg p-2 text-green-600 hover:bg-green-50
-                                        dark:hover:bg-green-950/40"
-                                        title="Escribir por WhatsApp"
-                                        >
-                                        <MessageCircle class="h-4 w-4" />
+                                        <a :href="whatsappLink(appointment)" target="_blank" rel="noopener" class="rounded-lg p-2 text-green-600 hover:bg-green-50
+                                        dark:hover:bg-green-950/40" title="Escribir por WhatsApp">
+                                            <MessageCircle class="h-4 w-4" />
                                         </a>
                                         <button
                                             class="rounded-lg p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40"
