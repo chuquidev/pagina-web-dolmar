@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search, ShoppingBag, ShoppingCart, Menu, X } from '@lucide/vue'
 import { useSettingsStore } from '@/stores/settings'
@@ -14,6 +14,17 @@ const search = ref('')
 const mobileMenuOpen = ref(false)
 const mobileSearchOpen = ref(false)
 const cartOpen = ref(false)
+const bump = ref(false)
+
+watch(
+    () => cartStore.totalItems,
+    (newVal, oldVal) => {
+        if (newVal > oldVal) {
+            bump.value = true
+            setTimeout(() => (bump.value = false), 350)
+        }
+    }
+)
 
 function submitSearch() {
     if (!search.value.trim()) return
@@ -49,11 +60,12 @@ function submitSearch() {
             </form>
 
             <button
-                class="relative hidden rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 md:block"
+                class="relative hidden rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 md:block"
                 aria-label="Ver carrito" @click="cartOpen = true">
-                <ShoppingCart class="h-5 w-5" />
+                <ShoppingCart class="h-5 w-5 transition-transform duration-300" :class="{ 'scale-125': bump }" />
                 <span v-if="cartStore.totalItems"
-                    class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-primary px-1 text-[10px] font-bold text-white">
+                    class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-primary px-1 text-[10px] font-bold text-white transition-transform duration-300"
+                    :class="{ 'scale-125': bump }">
                     {{ cartStore.totalItems }}
                 </span>
             </button>
@@ -64,9 +76,10 @@ function submitSearch() {
                 <button
                     class="relative rounded-lg p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
                     aria-label="Ver carrito" @click="cartOpen = true">
-                    <ShoppingCart class="h-5 w-5" />
+                    <ShoppingCart class="h-5 w-5 transition-transform duration-300" :class="{ 'scale-125': bump }" />
                     <span v-if="cartStore.totalItems"
-                        class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-primary px-1 text-[10px] font-bold text-white">
+                        class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-primary px-1 text-[10px] font-bold text-white transition-transform duration-300"
+                        :class="{ 'scale-125': bump }">
                         {{ cartStore.totalItems }}
                     </span>
                 </button>
