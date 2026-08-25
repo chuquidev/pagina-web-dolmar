@@ -4,6 +4,8 @@ import { useHead } from '@unhead/vue'
 import { Check, Clock, Wrench } from '@lucide/vue'
 import { catalogService } from '@/services/catalog.service'
 import { useSettingsStore } from '@/stores/settings'
+import { useToastStore } from '@/stores/toast'
+import { useFormErrors } from '@/composables/useFormErrors'
 import { buildWhatsAppUrl } from '@/utils/whatsapp'
 import { formatCurrency } from '@/utils/currency'
 import Breadcrumbs from '@/components/Breadcrumbs.vue'
@@ -12,6 +14,8 @@ import type { MaintenanceService, MaintenanceAppointment } from '@/types/catalog
 useHead(() => ({ title: 'Reservar mantenimiento' }))
 
 const settingsStore = useSettingsStore()
+const toastStore = useToastStore()
+const { getError, parseErrors, clearErrors } = useFormErrors()
 
 const services = ref<MaintenanceService[]>([])
 const loadingServices = ref(true)
@@ -27,7 +31,6 @@ const customerPhone = ref('')
 const bikeInfo = ref('')
 
 const submitting = ref(false)
-const submitError = ref('')
 const confirmedAppointment = ref<MaintenanceAppointment | null>(null)
 
 const minDate = computed(() => new Date().toISOString().slice(0, 10))
@@ -63,7 +66,7 @@ watch([selectedServiceId, selectedDate], loadSlots)
 async function submit() {
     if (!selectedServiceId.value || !selectedDate.value || !selectedTime.value) return
     submitting.value = true
-    submitError.value = ''
+    clearErrors()
     try {
         confirmedAppointment.value = await catalogService.createAppointment({
             maintenance_service_id: selectedServiceId.value,
@@ -73,10 +76,11 @@ async function submit() {
             customer_phone: customerPhone.value,
             bike_info: bikeInfo.value || undefined,
         })
+        toastStore.success('¡Cita reservada con éxito!')
     } catch (err) {
-        const axiosError = err as { response?: { status?: number; data?: { message?: string } } }
-        submitError.value = axiosError.response?.data?.message ?? 'No se pudo reservar la cita. Intenta con otro horario.'
-        if (axiosError.response?.status === 422) {
+        const message = parseErrors(err)
+        toastStore.error(message)
+        if ((err as { response?: { status?: number } }).response?.status === 422) {
             await loadSlots()
         }
     } finally {
@@ -108,7 +112,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="mx-auto max-w-7xl px-4 py-10 sm:py-12">
+    <div class="mx-auto max-w-2xl px-4 py-10 sm:py-12">
         <Breadcrumbs :items="[{ label: 'Inicio', to: '/' }, { label: 'Reservar mantenimiento' }]" />
 
         <h1 class="font-display text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">Reserva tu
@@ -195,12 +199,18 @@ onMounted(async () => {
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre completo</label>
                     <input v-model="customerName" type="text" required
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('customer_name') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('customer_name')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('customer_name') }}</p>
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">WhatsApp / Teléfono</label>
                     <input v-model="customerPhone" type="text" required placeholder="987654321"
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('customer_phone') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('customer_phone')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('customer_phone') }}</p>
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Modelo de tu bicicleta
@@ -208,8 +218,6 @@ onMounted(async () => {
                     <input v-model="bikeInfo" type="text" placeholder="Ej: MTB aro 29, marca Trek"
                         class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
                 </div>
-
-                <p v-if="submitError" class="text-sm text-red-600 dark:text-red-400">{{ submitError }}</p>
 
                 <button type="submit" :disabled="submitting"
                     class="w-full rounded-full bg-brand-primary py-3 font-display font-semibold text-white transition hover:brightness-110 disabled:opacity-60 sm:w-auto sm:px-8">

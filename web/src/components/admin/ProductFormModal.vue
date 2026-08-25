@@ -4,10 +4,15 @@ import { Plus, X as XIcon, Trash2, ImagePlus } from '@lucide/vue'
 import Modal from './Modal.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import { adminProductsService } from '@/services/admin/products.service'
+import { useToastStore } from '@/stores/toast'
+import { useFormErrors } from '@/composables/useFormErrors'
 import type { Product, Category, Brand, Availability, ProductImage } from '@/types/catalog'
 
 const props = defineProps<{ product: Product | null; categories: Category[]; brands: Brand[] }>()
 const emit = defineEmits<{ close: []; saved: [] }>()
+
+const toastStore = useToastStore()
+const { getError, parseErrors, clearErrors } = useFormErrors()
 
 const name = ref('')
 const categoryId = ref<number | null>(null)
@@ -24,7 +29,6 @@ const existingImages = ref<ProductImage[]>([])
 const newImages = ref<File[]>([])
 const newImagePreviews = ref<string[]>([])
 const saving = ref(false)
-const error = ref('')
 const confirmDeleteImageId = ref<number | null>(null)
 
 watch(
@@ -43,6 +47,7 @@ watch(
         existingImages.value = product?.images ? [...product.images] : []
         newImages.value = []
         newImagePreviews.value = []
+        clearErrors()
     },
     { immediate: true }
 )
@@ -78,6 +83,7 @@ async function confirmRemoveExistingImage() {
     await adminProductsService.deleteImage(props.product.id, confirmDeleteImageId.value)
     existingImages.value = existingImages.value.filter((img) => img.id !== confirmDeleteImageId.value)
     confirmDeleteImageId.value = null
+    toastStore.success('Imagen eliminada.')
 }
 
 function buildFormData(): FormData {
@@ -98,7 +104,7 @@ function buildFormData(): FormData {
 
 async function submit() {
     saving.value = true
-    error.value = ''
+    clearErrors()
     try {
         const formData = buildFormData()
         if (props.product) {
@@ -107,8 +113,8 @@ async function submit() {
             await adminProductsService.create(formData)
         }
         emit('saved')
-    } catch {
-        error.value = 'No se pudo guardar el producto. Revisa los campos.'
+    } catch (err) {
+        toastStore.error(parseErrors(err))
     } finally {
         saving.value = false
     }
@@ -121,16 +127,22 @@ async function submit() {
             <div>
                 <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
                 <input v-model="name" type="text" required
-                    class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                    class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                    :class="getError('name') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                <p v-if="getError('name')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('name') }}
+                </p>
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
                     <select v-model.number="categoryId" required
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('category_id') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'">
                         <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
                     </select>
+                    <p v-if="getError('category_id')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('category_id') }}</p>
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Marca</label>
@@ -152,12 +164,18 @@ async function submit() {
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Precio</label>
                     <input v-model="price" type="number" step="0.01" min="0" required
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('price') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('price')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('price')
+                        }}</p>
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Precio de oferta</label>
                     <input v-model="salePrice" type="number" step="0.01" min="0"
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('sale_price') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('sale_price')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('sale_price') }}</p>
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Disponibilidad</label>
@@ -242,8 +260,6 @@ async function submit() {
                     Activo
                 </label>
             </div>
-
-            <p v-if="error" class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
 
             <div class="flex justify-end gap-2 pt-2">
                 <button type="button"

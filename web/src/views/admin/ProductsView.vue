@@ -7,9 +7,10 @@ import ProductFormModal from '@/components/admin/ProductFormModal.vue'
 import ConfirmDialog from '@/components/admin/ConfirmDialog.vue'
 import type { Product } from '@/types/catalog'
 import AvailabilityBadge from '@/components/AvailabilityBadge.vue'
+import { useToastStore } from '@/stores/toast'
+
 
 const catalogStore = useCatalogStore()
-
 const products = ref<Product[]>([])
 const total = ref(0)
 const currentPage = ref(1)
@@ -18,7 +19,7 @@ const loading = ref(true)
 const showModal = ref(false)
 const editingProduct = ref<Product | null>(null)
 const confirmDeleteProduct = ref<Product | null>(null)
-
+const toastStore = useToastStore()
 const search = ref('')
 const categoryId = ref<number | ''>('')
 const brandId = ref<number | ''>('')
@@ -61,6 +62,7 @@ function openEdit(product: Product) {
 
 async function handleSaved() {
     showModal.value = false
+    toastStore.success(editingProduct.value ? 'Producto actualizado.' : 'Producto creado.')
     await load(currentPage.value, { silent: true })
 }
 
@@ -77,6 +79,7 @@ async function confirmDelete() {
     const index = products.value.findIndex((p) => p.id === id)
     if (index !== -1) products.value.splice(index, 1)
     total.value = Math.max(0, total.value - 1)
+    toastStore.success('Producto eliminado.')
 
     if (!products.value.length && currentPage.value > 1) {
         await load(currentPage.value - 1)
@@ -87,6 +90,7 @@ async function toggleActive(product: Product) {
     const updated = await adminProductsService.toggleActive(product.id)
     const index = products.value.findIndex((p) => p.id === product.id)
     if (index !== -1) products.value[index] = updated
+    toastStore.info(updated.is_active ? 'Producto activado.' : 'Producto desactivado.')
 }
 
 onMounted(async () => {
@@ -101,7 +105,7 @@ onMounted(async () => {
             <div>
                 <h1 class="font-display text-xl font-bold text-gray-900 dark:text-gray-100 sm:text-2xl">Productos</h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ total }} producto{{ total === 1 ? '' : 's'
-                }} en total</p>
+                    }} en total</p>
             </div>
             <button
                 class="flex items-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
@@ -174,7 +178,7 @@ onMounted(async () => {
                                             </div>
                                         </div>
                                         <span class="font-medium text-gray-900 dark:text-gray-100">{{ product.name
-                                        }}</span>
+                                            }}</span>
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ product.category.name }}</td>
