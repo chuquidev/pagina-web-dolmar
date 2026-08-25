@@ -10,16 +10,22 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: false,
-      includeAssets: ["favicon.ico", "apple-touch-icon.png"],
+      scope: "/admin/",
+      includeAssets: [
+        "favicon.ico",
+        "favicon-32x32.png",
+        "favicon-16x16.png",
+        "apple-touch-icon.png",
+      ],
       manifest: {
-        name: "Dolmar Bikes",
-        short_name: "Dolmar Bikes",
-        description:
-          "Catálogo online — consulta y compra directo por WhatsApp.",
+        name: "Dolmar Bikes Admin",
+        short_name: "Dolmar Admin",
+        description: "Panel de administración de Dolmar Bikes.",
         theme_color: "#1e3a8a",
         background_color: "#ffffff",
         display: "standalone",
-        start_url: "/",
+        start_url: "/admin/dashboard",
+        scope: "/admin/",
         icons: [
           { src: "/pwa-192x192.png", sizes: "192x192", type: "image/png" },
           { src: "/pwa-512x512.png", sizes: "512x512", type: "image/png" },
@@ -37,7 +43,7 @@ export default defineConfig({
             urlPattern: /\/storage\/.*\.(png|jpg|jpeg|webp|svg)$/,
             handler: "StaleWhileRevalidate",
             options: {
-              cacheName: "product-images",
+              cacheName: "admin-images",
               expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },

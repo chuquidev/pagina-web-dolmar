@@ -41,6 +41,11 @@ const router = createRouter({
           component: () => import("@/views/SizeGuideView.vue"),
         },
         {
+          path: "reservar-mantenimiento",
+          name: "maintenance-booking",
+          component: () => import("@/views/MaintenanceBookingView.vue"),
+        },
+        {
           path: "politica-privacidad",
           name: "privacy-policy",
           component: () => import("@/views/LegalPageView.vue"),
@@ -51,11 +56,6 @@ const router = createRouter({
           name: "terms-conditions",
           component: () => import("@/views/LegalPageView.vue"),
           props: { field: "terms_conditions", title: "Términos y condiciones" },
-        },
-        {
-          path: "reservar-mantenimiento",
-          name: "maintenance-booking",
-          component: () => import("@/views/MaintenanceBookingView.vue"),
         },
       ],
     },
@@ -96,16 +96,6 @@ const router = createRouter({
           component: () => import("@/views/admin/BannersView.vue"),
         },
         {
-          path: "faqs",
-          name: "admin-faqs",
-          component: () => import("@/views/admin/FaqsView.vue"),
-        },
-        {
-          path: "settings",
-          name: "admin-settings",
-          component: () => import("@/views/admin/SettingsView.vue"),
-        },
-        {
           path: "maintenance-services",
           name: "admin-maintenance-services",
           component: () => import("@/views/admin/MaintenanceServicesView.vue"),
@@ -120,6 +110,16 @@ const router = createRouter({
           name: "admin-appointments",
           component: () =>
             import("@/views/admin/MaintenanceAppointmentsView.vue"),
+        },
+        {
+          path: "faqs",
+          name: "admin-faqs",
+          component: () => import("@/views/admin/FaqsView.vue"),
+        },
+        {
+          path: "settings",
+          name: "admin-settings",
+          component: () => import("@/views/admin/SettingsView.vue"),
         },
       ],
     },
@@ -156,6 +156,20 @@ router.beforeEach(async (to) => {
 router.afterEach((to) => {
   const themeStore = useThemeStore();
   themeStore.setSection(to.path.startsWith("/admin") ? "admin" : "public");
+});
+
+router.afterEach((to) => {
+  const isAdmin = to.path.startsWith("/admin");
+  const existingLink = document.querySelector('link[rel="manifest"]');
+
+  if (isAdmin && !existingLink) {
+    const link = document.createElement("link");
+    link.rel = "manifest";
+    link.href = "/manifest.webmanifest";
+    document.head.appendChild(link);
+  } else if (!isAdmin && existingLink) {
+    existingLink.remove();
+  }
 });
 
 let navigationCount = 0;
