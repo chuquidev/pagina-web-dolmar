@@ -26,6 +26,7 @@ class MaintenanceAppointmentController extends Controller
                 ->where('starts_at', '<', $endsAt)
                 ->where('ends_at', '>', $startsAt)
                 ->lockForUpdate()
+                ->get()
                 ->count();
 
             if ($overlapping >= $settings->capacity) {
