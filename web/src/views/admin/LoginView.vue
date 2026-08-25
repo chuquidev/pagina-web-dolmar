@@ -5,6 +5,7 @@ import { Mail, Lock, Eye, EyeOff, ShoppingBag } from '@lucide/vue'
 import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
 import ThemeToggle from '@/components/ThemeToggle.vue'
+import BikePatternBackground from '@/components/BikePatternBackground.vue'
 
 const email = ref('')
 const password = ref('')
@@ -35,14 +36,17 @@ async function submit() {
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div class="relative flex min-h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+        <BikePatternBackground color="var(--color-brand-primary)" :opacity="0.05" />
+
         <ThemeToggle class="fixed right-4 top-4 z-10" />
 
-        <!-- Panel de marca (solo desktop) -->
         <div class="relative hidden w-1/2 items-center justify-center overflow-hidden lg:flex">
             <div class="absolute inset-0"
                 style="background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-secondary))">
             </div>
+            <BikePatternBackground color="white" :opacity="0.12" />
+
             <div class="relative flex flex-col items-center px-10 text-center text-white">
                 <div class="flex h-28 w-28 items-center justify-center rounded-3xl bg-white/95 p-4 shadow-xl">
                     <img v-if="settingsStore.settings?.logo" :src="settingsStore.settings.logo"
@@ -57,8 +61,7 @@ async function submit() {
             </div>
         </div>
 
-        <!-- Formulario -->
-        <div class="flex w-full flex-1 items-center justify-center px-4 py-12 lg:w-1/2">
+        <div class="relative z-[1] flex w-full flex-1 items-center justify-center px-4 py-12 lg:w-1/2">
             <div
                 class="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
                 <div class="text-center lg:hidden">
@@ -81,7 +84,7 @@ async function submit() {
 
                 <form class="mt-8 space-y-5" @submit.prevent="submit">
                     <div>
-                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Correo electrónico</label>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Correo</label>
                         <div class="relative mt-1">
                             <Mail
                                 class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
