@@ -104,8 +104,15 @@ onMounted(load)
 
         <!-- LOADING -->
         <div v-if="loading"
-            class="w-full rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-400 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-500">
-            Cargando...
+            class="w-full max-w-7xl animate-pulse space-y-6 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6 lg:p-7">
+            <div class="h-4 w-40 rounded bg-gray-100 dark:bg-gray-800"></div>
+            <div class="space-y-3">
+                <div v-for="i in 7" :key="i" class="h-10 rounded-lg bg-gray-100 dark:bg-gray-800"></div>
+            </div>
+            <div class="h-4 w-32 rounded bg-gray-100 dark:bg-gray-800"></div>
+            <div class="grid gap-4 sm:grid-cols-3">
+                <div v-for="i in 3" :key="i" class="h-10 rounded-lg bg-gray-100 dark:bg-gray-800"></div>
+            </div>
         </div>
 
         <!-- FORMULARIO -->
@@ -213,8 +220,8 @@ onMounted(load)
                         <input v-model.number="capacity" type="number" min="1" required
                             class="mt-1.5 h-11 w-full rounded-lg border px-3 text-sm text-gray-900 outline-none transition focus:ring-2 focus:ring-brand-primary/10 dark:bg-gray-800 dark:text-gray-100"
                             :class="getError('capacity')
-                                    ? 'border-red-400 dark:border-red-700'
-                                    : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'
+                                ? 'border-red-400 dark:border-red-700'
+                                : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'
                                 " />
 
                         <p v-if="getError('capacity')" class="mt-1 text-xs text-red-600 dark:text-red-400">
@@ -236,8 +243,8 @@ onMounted(load)
                         <input v-model.number="slotIntervalMinutes" type="number" min="5" step="5" required
                             class="mt-1.5 h-11 w-full rounded-lg border px-3 text-sm text-gray-900 outline-none transition focus:ring-2 focus:ring-brand-primary/10 dark:bg-gray-800 dark:text-gray-100"
                             :class="getError('slot_interval_minutes')
-                                    ? 'border-red-400 dark:border-red-700'
-                                    : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'
+                                ? 'border-red-400 dark:border-red-700'
+                                : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'
                                 " />
 
                         <p v-if="getError('slot_interval_minutes')" class="mt-1 text-xs text-red-600 dark:text-red-400">
@@ -258,8 +265,8 @@ onMounted(load)
                         <input v-model.number="advanceBookingDays" type="number" min="1" required
                             class="mt-1.5 h-11 w-full rounded-lg border px-3 text-sm text-gray-900 outline-none transition focus:ring-2 focus:ring-brand-primary/10 dark:bg-gray-800 dark:text-gray-100"
                             :class="getError('advance_booking_days')
-                                    ? 'border-red-400 dark:border-red-700'
-                                    : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'
+                                ? 'border-red-400 dark:border-red-700'
+                                : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'
                                 " />
 
                         <p v-if="getError('advance_booking_days')" class="mt-1 text-xs text-red-600 dark:text-red-400">
@@ -280,8 +287,8 @@ onMounted(load)
                         <input v-model.number="minNoticeHours" type="number" min="0" required
                             class="mt-1.5 h-11 w-full rounded-lg border px-3 text-sm text-gray-900 outline-none transition focus:ring-2 focus:ring-brand-primary/10 dark:bg-gray-800 dark:text-gray-100"
                             :class="getError('min_notice_hours')
-                                    ? 'border-red-400 dark:border-red-700'
-                                    : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'
+                                ? 'border-red-400 dark:border-red-700'
+                                : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'
                                 " />
 
                         <p v-if="getError('min_notice_hours')" class="mt-1 text-xs text-red-600 dark:text-red-400">

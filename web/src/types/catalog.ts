@@ -35,12 +35,15 @@ export interface Brand {
 
 export interface Product {
   id: number;
+  sku: string | null;
   name: string;
   slug: string;
   description: string | null;
   features: string[] | null;
   price: string;
   sale_price: string | null;
+  stock: number | null;
+  min_price: string | null;
   availability: Availability;
   is_featured: boolean;
   is_active: boolean;
@@ -134,4 +137,30 @@ export interface MaintenanceAppointment {
   ends_at: string;
   status: AppointmentStatus;
   created_at: string;
+}
+
+export type ImportRowStatus = "new" | "update" | "invalid";
+
+export interface ProductImportRow {
+  row: number;
+  sku: string;
+  name: string;
+  brand: string | null;
+  category: string | null;
+  price: number | null;
+  min_price: number | null;
+  stock: number;
+  category_exists: boolean;
+  brand_exists: boolean;
+  existing_product_id: number | null;
+  status: ImportRowStatus;
+  changes?: Record<string, [unknown, unknown]>;
+  errors: string[];
+}
+
+export interface ProductImportSummary {
+  created: number;
+  updated: number;
+  skipped: number;
+  errors: { row: number | null; sku: string | null; errors: string[] }[];
 }

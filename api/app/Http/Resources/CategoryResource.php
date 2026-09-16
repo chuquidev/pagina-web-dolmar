@@ -15,7 +15,11 @@ class CategoryResource extends JsonResource
             'slug' => $this->slug,
             'order' => $this->order,
             'is_active' => $this->is_active,
-            'image' => $this->getFirstMediaUrl('image', 'card') ?: null,
+            'image' => $this->getFirstMedia('image')
+                ? ($this->getFirstMedia('image')->hasGeneratedConversion('card')
+                    ? $this->getFirstMediaUrl('image', 'card')
+                    : $this->getFirstMediaUrl('image'))
+                : null,
         ];
     }
 }

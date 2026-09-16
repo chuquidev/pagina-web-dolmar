@@ -1,5 +1,10 @@
 import { api } from "../api";
-import type { Product, PaginatedResponse } from "@/types/catalog";
+import type {
+  Product,
+  PaginatedResponse,
+  ProductImportRow,
+  ProductImportSummary,
+} from "@/types/catalog";
 
 export interface ProductAdminFilters {
   search?: string;
@@ -34,4 +39,19 @@ export const adminProductsService = {
       .then((r) => r.data.data),
   deleteImage: (productId: number, mediaId: number) =>
     api.delete(`/admin/products/${productId}/images/${mediaId}`),
+
+  previewImport: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api
+      .post<{
+        rows: ProductImportRow[];
+      }>("/admin/products/import/preview", formData)
+      .then((r) => r.data.rows);
+  },
+
+  commitImport: (rows: ProductImportRow[]) =>
+    api
+      .post<ProductImportSummary>("/admin/products/import/commit", { rows })
+      .then((r) => r.data),
 };

@@ -22,7 +22,11 @@ class BannerResource extends JsonResource
             'button_url' => $this->button_url,
             'order' => $this->order,
             'is_active' => $this->is_active,
-            'image' => $this->getFirstMediaUrl('image', 'banner') ?: null,
+            'image' => $this->getFirstMedia('image')
+                ? ($this->getFirstMedia('image')->hasGeneratedConversion('banner')
+                    ? $this->getFirstMediaUrl('image', 'banner')
+                    : $this->getFirstMediaUrl('image'))
+                : null,
         ];
     }
 }

@@ -13,7 +13,10 @@ class ProductController extends Controller
     {
         $query = Product::query()
             ->with('category')
-            ->where('is_active', true);
+            ->where('is_active', true)
+            ->where(function ($q) {
+                $q->whereNull('stock')->orWhere('stock', '>', 0);
+            });
 
         if ($request->filled('category')) {
             $query->whereHas('category', fn($q) => $q->where('slug', $request->string('category')->value()));
@@ -45,6 +48,9 @@ class ProductController extends Controller
     {
         $product = Product::where('slug', $slug)
             ->where('is_active', true)
+            ->where(function ($q) {
+                $q->whereNull('stock')->orWhere('stock', '>', 0);
+            })
             ->with('category')
             ->firstOrFail();
 

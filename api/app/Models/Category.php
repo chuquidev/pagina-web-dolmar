@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Spatie\MediaLibrary\HasMedia;
@@ -20,6 +21,12 @@ class Category extends Model implements HasMedia
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(fn() => Cache::forget('public.categories'));
+        static::deleted(fn() => Cache::forget('public.categories'));
+    }
 
     public function getSlugOptions(): SlugOptions
     {
@@ -42,7 +49,6 @@ class Category extends Model implements HasMedia
     {
         $this->addMediaConversion('card')
             ->fit(Fit::Crop, 600, 750)
-            ->format('webp')
-            ->nonQueued();
+            ->format('webp');
     }
 }

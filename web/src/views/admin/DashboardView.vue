@@ -23,25 +23,37 @@ onMounted(async () => {
             authStore.user?.name }}</h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Resumen general de tu catálogo.</p>
 
-        <div v-if="loading" class="mt-6 text-gray-400 dark:text-gray-500">Cargando...</div>
+        <div v-if="loading" class="animate-pulse">
+            <div
+                class="mt-6 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:divide-gray-800 dark:border-gray-800 dark:bg-gray-900 sm:grid-cols-4">
+                <div v-for="i in 8" :key="i" class="p-4 sm:p-5">
+                    <div class="h-3 w-16 rounded bg-gray-100 dark:bg-gray-800"></div>
+                    <div class="mt-3 h-6 w-10 rounded bg-gray-100 dark:bg-gray-800"></div>
+                </div>
+            </div>
+            <div class="mt-6 grid gap-4 lg:grid-cols-2">
+                <div class="h-64 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+                </div>
+                <div class="h-64 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+                </div>
+            </div>
+            <div class="mt-6 h-56 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+            </div>
+        </div>
 
         <template v-else-if="stats">
-            <!-- Todas las métricas en un solo grid continuo, 2 columnas ya desde el celular -->
-            <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+            <!-- Un solo panel con divisores en vez de 8 tarjetas idénticas -->
+            <div
+                class="mt-6 grid grid-cols-2 divide-x divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:divide-gray-800 dark:border-gray-800 dark:bg-gray-900 sm:grid-cols-4">
                 <StatCard label="Productos" :value="stats.total_products" :icon="Package" />
                 <StatCard label="Categorías" :value="stats.total_categories" :icon="FolderTree" />
                 <StatCard label="Marcas" :value="stats.total_brands" :icon="FolderTree" />
-                <StatCard label="Destacados" :value="stats.featured_products" :icon="Star"
-                    icon-bg="bg-amber-50 dark:bg-amber-950/40" icon-color="text-amber-600 dark:text-amber-400" />
-                <StatCard label="Con oferta" :value="stats.products_with_offers" :icon="Percent"
-                    icon-bg="bg-red-50 dark:bg-red-950/40" icon-color="text-red-600 dark:text-red-400" />
-                <StatCard label="Activos" :value="stats.active_products" :icon="Power"
-                    icon-bg="bg-green-50 dark:bg-green-950/40" icon-color="text-green-600 dark:text-green-400" />
-                <StatCard label="Inactivos" :value="stats.inactive_products" :icon="Power"
-                    icon-bg="bg-gray-100 dark:bg-gray-800" icon-color="text-gray-500 dark:text-gray-400" />
+                <StatCard label="Destacados" :value="stats.featured_products" :icon="Star" />
+                <StatCard label="Con oferta" :value="stats.products_with_offers" :icon="Percent" />
+                <StatCard label="Activos" :value="stats.active_products" :icon="Power" />
+                <StatCard label="Inactivos" :value="stats.inactive_products" :icon="Power" />
                 <StatCard label="Sin imágenes" :value="stats.products_without_images" :icon="ImageOff"
-                    :icon-bg="stats.products_without_images > 0 ? 'bg-amber-50 dark:bg-amber-950/40' : 'bg-gray-100 dark:bg-gray-800'"
-                    :icon-color="stats.products_without_images > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400 dark:text-gray-500'" />
+                    :value-class="stats.products_without_images > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-gray-100'" />
             </div>
 
             <p v-if="stats.products_without_images > 0"

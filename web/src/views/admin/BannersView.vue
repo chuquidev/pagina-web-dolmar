@@ -4,6 +4,8 @@ import { Plus, Pencil, Trash2, Search, ImageOff } from '@lucide/vue'
 import { adminBannersService } from '@/services/admin/banners.service'
 import BannerFormModal from '@/components/admin/BannerFormModal.vue'
 import ConfirmDialog from '@/components/admin/ConfirmDialog.vue'
+import Pagination from '@/components/admin/Pagination.vue'
+import TableSkeletonRows from '@/components/admin/TableSkeletonRows.vue'
 import { useToastStore } from '@/stores/toast'
 import type { Banner } from '@/types/catalog'
 
@@ -119,10 +121,7 @@ onMounted(() => load())
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                        <tr v-if="loading">
-                            <td colspan="5" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">Cargando...
-                            </td>
-                        </tr>
+                        <TableSkeletonRows v-if="loading" :columns="5" />
                         <tr v-else-if="!banners.length">
                             <td colspan="5" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">No se
                                 encontraron banners.</td>
@@ -169,13 +168,7 @@ onMounted(() => load())
             </div>
         </div>
 
-        <div v-if="lastPage > 1" class="mt-6 flex flex-wrap justify-center gap-2">
-            <button v-for="page in lastPage" :key="page" class="h-9 w-9 rounded-full text-sm"
-                :class="page === currentPage ? 'bg-brand-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'"
-                @click="load(page)">
-                {{ page }}
-            </button>
-        </div>
+        <Pagination :current-page="currentPage" :last-page="lastPage" :total="total" @change="load" />
 
         <BannerFormModal v-if="showModal" :banner="editingBanner" @close="showModal = false" @saved="handleSaved" />
         <ConfirmDialog v-if="confirmDeleteBanner" title="Eliminar banner"

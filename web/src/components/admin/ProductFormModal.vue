@@ -15,11 +15,14 @@ const toastStore = useToastStore()
 const { getError, parseErrors, clearErrors } = useFormErrors()
 
 const name = ref('')
+const sku = ref('')
 const categoryId = ref<number | null>(null)
 const brandId = ref<number | null>(null)
 const description = ref('')
 const price = ref('')
 const salePrice = ref('')
+const stock = ref('')
+const minPrice = ref('')
 const availability = ref<Availability>('in_stock')
 const isFeatured = ref(false)
 const isActive = ref(true)
@@ -35,11 +38,14 @@ watch(
     () => props.product,
     (product) => {
         name.value = product?.name ?? ''
+        sku.value = product?.sku ?? ''
         categoryId.value = product?.category.id ?? props.categories[0]?.id ?? null
         brandId.value = product?.brand?.id ?? null
         description.value = product?.description ?? ''
         price.value = product?.price ?? ''
         salePrice.value = product?.sale_price ?? ''
+        stock.value = product?.stock !== null && product?.stock !== undefined ? String(product.stock) : ''
+        minPrice.value = product?.min_price ?? ''
         availability.value = product?.availability ?? 'in_stock'
         isFeatured.value = product?.is_featured ?? false
         isActive.value = product?.is_active ?? true
@@ -89,11 +95,14 @@ async function confirmRemoveExistingImage() {
 function buildFormData(): FormData {
     const formData = new FormData()
     formData.append('name', name.value)
+    if (sku.value.trim()) formData.append('sku', sku.value.trim())
     formData.append('category_id', String(categoryId.value))
     if (brandId.value) formData.append('brand_id', String(brandId.value))
     formData.append('description', description.value)
     formData.append('price', price.value)
     if (salePrice.value) formData.append('sale_price', salePrice.value)
+    if (stock.value !== '') formData.append('stock', stock.value)
+    if (minPrice.value !== '') formData.append('min_price', minPrice.value)
     formData.append('availability', availability.value)
     formData.append('is_featured', isFeatured.value ? '1' : '0')
     formData.append('is_active', isActive.value ? '1' : '0')
@@ -124,13 +133,24 @@ async function submit() {
 <template>
     <Modal :title="product ? 'Editar producto' : 'Nuevo producto'" size="lg" @close="emit('close')">
         <form class="space-y-4" @submit.prevent="submit">
-            <div>
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
-                <input v-model="name" type="text" required
-                    class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-                    :class="getError('name') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
-                <p v-if="getError('name')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('name') }}
-                </p>
+            <div class="grid gap-4 sm:grid-cols-3">
+                <div class="sm:col-span-2">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
+                    <input v-model="name" type="text" required
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('name') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('name')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('name')
+                        }}
+                    </p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Código (SKU)</label>
+                    <input v-model="sku" type="text" placeholder="Ej: 1233"
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('sku') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('sku')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('sku') }}
+                    </p>
+                </div>
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2">
@@ -167,7 +187,7 @@ async function submit() {
                         class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
                         :class="getError('price') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
                     <p v-if="getError('price')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('price')
-                        }}</p>
+                    }}</p>
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Precio de oferta</label>
@@ -178,13 +198,38 @@ async function submit() {
                         getError('sale_price') }}</p>
                 </div>
                 <div>
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Precio mínimo (interno)</label>
+                    <input v-model="minPrice" type="number" step="0.01" min="0"
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('min_price') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('min_price')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                        getError('min_price') }}</p>
+                </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Stock</label>
+                    <input v-model="stock" type="number" step="1" min="0" placeholder="Vacío = no controlar inventario"
+                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                        :class="getError('stock') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                    <p v-if="getError('stock')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('stock')
+                    }}</p>
+                    <p v-else class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                        Si le pones un número, el producto se oculta solo del catálogo cuando llegue a 0.
+                    </p>
+                </div>
+                <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Disponibilidad</label>
-                    <select v-model="availability"
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    <select v-model="availability" :disabled="stock !== ''"
+                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                         <option value="in_stock">Disponible</option>
                         <option value="out_of_stock">Agotado</option>
                         <option value="on_request">Por encargo</option>
                     </select>
+                    <p v-if="stock !== ''" class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                        Se calcula automáticamente a partir del stock.
+                    </p>
                 </div>
             </div>
 

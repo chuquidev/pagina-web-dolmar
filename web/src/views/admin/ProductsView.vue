@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import { Plus, Pencil, Trash2, Eye, Package, Search } from '@lucide/vue'
+import { Plus, Pencil, Trash2, Eye, Package, Search, Upload } from '@lucide/vue'
 import { adminProductsService } from '@/services/admin/products.service'
 import { useCatalogStore } from '@/stores/catalog'
 import ProductFormModal from '@/components/admin/ProductFormModal.vue'
+import ProductImportModal from '@/components/admin/ProductImportModal.vue'
 import ConfirmDialog from '@/components/admin/ConfirmDialog.vue'
+import Pagination from '@/components/admin/Pagination.vue'
+import TableSkeletonRows from '@/components/admin/TableSkeletonRows.vue'
 import type { Product } from '@/types/catalog'
 import AvailabilityBadge from '@/components/AvailabilityBadge.vue'
 import { useToastStore } from '@/stores/toast'
@@ -17,6 +20,7 @@ const currentPage = ref(1)
 const lastPage = ref(1)
 const loading = ref(true)
 const showModal = ref(false)
+const showImportModal = ref(false)
 const editingProduct = ref<Product | null>(null)
 const confirmDeleteProduct = ref<Product | null>(null)
 const toastStore = useToastStore()
@@ -93,6 +97,11 @@ async function toggleActive(product: Product) {
     toastStore.info(updated.is_active ? 'Producto activado.' : 'Producto desactivado.')
 }
 
+async function handleImported() {
+    showImportModal.value = false
+    await load(1)
+}
+
 onMounted(async () => {
     await catalogStore.fetch()
     await load()
@@ -105,14 +114,22 @@ onMounted(async () => {
             <div>
                 <h1 class="font-display text-xl font-bold text-gray-900 dark:text-gray-100 sm:text-2xl">Productos</h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ total }} producto{{ total === 1 ? '' : 's'
-                    }} en total</p>
+                }} en total</p>
             </div>
-            <button
-                class="flex items-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
-                @click="openCreate">
-                <Plus class="h-4 w-4" />
-                Nuevo producto
-            </button>
+            <div class="flex items-center gap-2">
+                <button
+                    class="flex items-center gap-2 rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                    @click="showImportModal = true">
+                    <Upload class="h-4 w-4" />
+                    Importar Excel
+                </button>
+                <button
+                    class="flex items-center gap-2 rounded-full bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+                    @click="openCreate">
+                    <Plus class="h-4 w-4" />
+                    Nuevo producto
+                </button>
+            </div>
         </div>
 
         <div class="mt-4 flex flex-wrap gap-3">
@@ -146,22 +163,21 @@ onMounted(async () => {
                         class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-gray-800 dark:bg-gray-800/60 dark:text-gray-400">
                         <tr>
                             <th class="px-4 py-3">Producto</th>
+                            <th class="px-4 py-3">Código</th>
                             <th class="px-4 py-3">Categoría</th>
                             <th class="px-4 py-3">Marca</th>
                             <th class="px-4 py-3">Precio</th>
                             <th class="px-4 py-3">Precio de oferta</th>
+                            <th class="px-4 py-3">Stock</th>
                             <th class="px-4 py-3">Disponibilidad</th>
                             <th class="px-4 py-3">Estado</th>
                             <th class="px-4 py-3 text-right">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                        <tr v-if="loading">
-                            <td colspan="8" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">Cargando...
-                            </td>
-                        </tr>
+                        <TableSkeletonRows v-if="loading" :columns="10" />
                         <tr v-else-if="!products.length">
-                            <td colspan="8" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">No se
+                            <td colspan="10" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">No se
                                 encontraron productos.</td>
                         </tr>
                         <template v-else>
@@ -178,15 +194,21 @@ onMounted(async () => {
                                             </div>
                                         </div>
                                         <span class="font-medium text-gray-900 dark:text-gray-100">{{ product.name
-                                            }}</span>
+                                        }}</span>
                                     </div>
                                 </td>
+                                <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ product.sku ?? '—' }}</td>
                                 <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ product.category.name }}</td>
                                 <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ product.brand?.name ?? '—' }}
                                 </td>
                                 <td class="px-4 py-3 text-gray-700 dark:text-gray-300">S/ {{ product.price }}</td>
                                 <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ product.sale_price ? `S/
                                     ${product.sale_price}` : '—' }}</td>
+                                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                    <span v-if="product.stock !== null"
+                                        :class="product.stock === 0 ? 'text-red-500' : ''">{{ product.stock }}</span>
+                                    <span v-else class="text-gray-400 dark:text-gray-600">—</span>
+                                </td>
                                 <td class="px-4 py-3">
                                     <AvailabilityBadge :availability="product.availability" />
                                 </td>
@@ -222,16 +244,11 @@ onMounted(async () => {
             </div>
         </div>
 
-        <div v-if="lastPage > 1" class="mt-6 flex flex-wrap justify-center gap-2">
-            <button v-for="page in lastPage" :key="page" class="h-9 w-9 rounded-full text-sm"
-                :class="page === currentPage ? 'bg-brand-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'"
-                @click="load(page)">
-                {{ page }}
-            </button>
-        </div>
+        <Pagination :current-page="currentPage" :last-page="lastPage" :total="total" @change="load" />
 
         <ProductFormModal v-if="showModal" :product="editingProduct" :categories="catalogStore.categories"
             :brands="catalogStore.brands" @close="showModal = false" @saved="handleSaved" />
+        <ProductImportModal v-if="showImportModal" @close="showImportModal = false" @imported="handleImported" />
         <ConfirmDialog v-if="confirmDeleteProduct" title="Eliminar producto"
             :message="`¿Eliminar &quot;${confirmDeleteProduct.name}&quot;? Esta acción no se puede deshacer.`"
             @confirm="confirmDelete" @cancel="confirmDeleteProduct = null" />

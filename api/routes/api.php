@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\MaintenanceAppointmentController;
 use App\Http\Controllers\Api\Admin\MaintenanceServiceController as AdminMaintenanceServiceController;
 use App\Http\Controllers\Api\Admin\MaintenanceSettingController as AdminMaintenanceSettingController;
 use App\Http\Controllers\Api\Admin\MaintenanceAppointmentController as AdminMaintenanceAppointmentController;
+use App\Http\Controllers\Api\Admin\ProductImportController;
 
 Route::post('/v1/admin/login', [AuthController::class, 'login'])
     ->middleware('throttle:5,1');
@@ -32,6 +33,8 @@ Route::middleware('auth:sanctum')->prefix('v1/admin')->group(function () {
     Route::apiResource('products', AdminProductController::class)->except(['show']);
     Route::patch('/products/{product}/toggle-active', [AdminProductController::class, 'toggleActive']);
     Route::delete('/products/{product}/images/{mediaId}', [AdminProductController::class, 'deleteImage']);
+    Route::post('/products/import/preview', [ProductImportController::class, 'preview']);
+    Route::post('/products/import/commit', [ProductImportController::class, 'commit']);
 
     Route::apiResource('categories', AdminCategoryController::class)->except(['show']);
 

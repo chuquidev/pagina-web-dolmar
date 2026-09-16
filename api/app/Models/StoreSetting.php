@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -33,6 +34,11 @@ class StoreSetting extends Model implements HasMedia
         'size_guide' => 'array',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(fn() => Cache::forget('public.settings'));
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('logo')->singleFile();
@@ -43,13 +49,11 @@ class StoreSetting extends Model implements HasMedia
     {
         $this->addMediaConversion('logo')
             ->fit(Fit::Max, 512, 512)
-            ->format('webp')
-            ->nonQueued();
+            ->format('webp');
 
         $this->addMediaConversion('gallery')
             ->fit(Fit::Crop, 800, 600)
-            ->format('webp')
-            ->nonQueued();
+            ->format('webp');
     }
 
     public static function current(): self

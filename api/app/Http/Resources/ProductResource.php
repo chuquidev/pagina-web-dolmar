@@ -11,12 +11,15 @@ class ProductResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'sku' => $this->sku,
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
             'features' => $this->features,
             'price' => $this->price,
             'sale_price' => $this->sale_price,
+            'stock' => $request->user() ? $this->stock : null,
+            'min_price' => $request->user() ? $this->min_price : null,
             'availability' => $this->availability,
             'is_featured' => $this->is_featured,
             'is_active' => $this->is_active,
@@ -24,8 +27,8 @@ class ProductResource extends JsonResource
             'brand' => $this->brand ? new BrandResource($this->brand) : null,
             'images' => $this->getMedia('images')->map(fn($media) => [
                 'id' => $media->id,
-                'thumb' => $media->getUrl('thumb'),
-                'large' => $media->getUrl('large'),
+                'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
+                'large' => $media->hasGeneratedConversion('large') ? $media->getUrl('large') : $media->getUrl(),
             ]),
         ];
     }

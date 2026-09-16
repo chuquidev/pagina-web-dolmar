@@ -3,6 +3,8 @@ import { onMounted, ref, watch } from 'vue'
 import { Search, Trash2, MessageCircle } from '@lucide/vue'
 import { adminMaintenanceAppointmentsService } from '@/services/admin/maintenance.service'
 import ConfirmDialog from '@/components/admin/ConfirmDialog.vue'
+import Pagination from '@/components/admin/Pagination.vue'
+import TableSkeletonRows from '@/components/admin/TableSkeletonRows.vue'
 import { useToastStore } from '@/stores/toast'
 import { buildWhatsAppUrl } from '@/utils/whatsapp'
 import type { MaintenanceAppointment, AppointmentStatus } from '@/types/catalog'
@@ -131,10 +133,7 @@ onMounted(() => load())
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                        <tr v-if="loading">
-                            <td colspan="5" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">Cargando...
-                            </td>
-                        </tr>
+                        <TableSkeletonRows v-if="loading" :columns="5" />
                         <tr v-else-if="!appointments.length">
                             <td colspan="5" class="px-4 py-8 text-center text-gray-400 dark:text-gray-500">No se
                                 encontraron citas.</td>
@@ -143,7 +142,7 @@ onMounted(() => load())
                             <tr v-for="appointment in appointments" :key="appointment.id">
                                 <td class="px-4 py-3">
                                     <p class="font-medium text-gray-900 dark:text-gray-100">{{ appointment.customer_name
-                                        }}</p>
+                                    }}</p>
                                     <p class="text-xs text-gray-400 dark:text-gray-500">{{ appointment.customer_phone }}
                                     </p>
                                     <p v-if="appointment.bike_info" class="text-xs text-gray-400 dark:text-gray-500">{{
@@ -184,13 +183,7 @@ onMounted(() => load())
             </div>
         </div>
 
-        <div v-if="lastPage > 1" class="mt-6 flex flex-wrap justify-center gap-2">
-            <button v-for="page in lastPage" :key="page" class="h-9 w-9 rounded-full text-sm"
-                :class="page === currentPage ? 'bg-brand-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'"
-                @click="load(page)">
-                {{ page }}
-            </button>
-        </div>
+        <Pagination :current-page="currentPage" :last-page="lastPage" :total="total" @change="load" />
 
         <ConfirmDialog v-if="confirmDeleteAppointment" title="Eliminar cita"
             message="¿Eliminar esta cita? Esta acción no se puede deshacer." @confirm="confirmDelete"

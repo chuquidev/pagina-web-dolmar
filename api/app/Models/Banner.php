@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -25,6 +26,12 @@ class Banner extends Model implements HasMedia
         'is_active' => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(fn() => Cache::forget('public.banners'));
+        static::deleted(fn() => Cache::forget('public.banners'));
+    }
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('image')->singleFile();
@@ -34,7 +41,6 @@ class Banner extends Model implements HasMedia
     {
         $this->addMediaConversion('banner')
             ->fit(Fit::Crop, 1600, 700)
-            ->format('webp')
-            ->nonQueued();
+            ->format('webp');
     }
 }

@@ -16,7 +16,8 @@ ssh "$VPS_USER@$VPS_IP" "
   php artisan config:cache &&
   php artisan route:cache &&
   php artisan view:cache &&
-  chown -R www-data:www-data storage bootstrap/cache
+  chown -R www-data:www-data storage bootstrap/cache &&
+  php artisan queue:restart
 "
 
 echo "✅ Backend actualizado. Recuerda: si este cambio incluye una migración nueva, corre 'php artisan migrate --force' manualmente en el VPS — no lo hace este script a propósito, por seguridad de tus datos en producción."
