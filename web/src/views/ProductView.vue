@@ -112,7 +112,7 @@ watch(() => props.slug, loadProduct)
 </script>
 
 <template>
-    <div class="mx-auto max-w-[1400px] px-4 py-6 sm:py-10">
+    <div class="mx-auto max-w-[1400px] px-4 py-6 sm:py-8">
         <button
             class="mb-4 flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-brand-primary dark:text-gray-300 sm:mb-6"
             @click="goBack">

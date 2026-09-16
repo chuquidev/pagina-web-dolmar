@@ -20,7 +20,8 @@ const lightboxOpen = ref(false)
         <div class="relative aspect-square overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800">
             <button v-if="images.length" class="relative h-full w-full" aria-label="Ver imagen ampliada"
                 @click="lightboxOpen = true">
-                <img :src="images[activeIndex].large" :alt="alt" class="h-full w-full cursor-zoom-in object-cover" />
+                <img :src="images[activeIndex].large" :alt="alt" class="h-full w-full cursor-zoom-in object-cover"
+                    fetchpriority="high" loading="eager" decoding="sync" />
                 <span
                     class="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white">
                     <Maximize2 class="h-4 w-4" />

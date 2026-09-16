@@ -11,10 +11,14 @@ class BannerController extends Controller
 {
     public function index()
     {
-        $banners = Cache::remember('public.banners', 300, function () {
-            return Banner::where('is_active', true)->orderBy('order')->get();
+        $data = Cache::remember('public.banners', 300, function () {
+            return Banner::where('is_active', true)
+                ->orderBy('order')
+                ->get()
+                ->map(fn(Banner $banner) => (new BannerResource($banner))->resolve())
+                ->all();
         });
 
-        return BannerResource::collection($banners);
+        return response()->json(['data' => $data]);
     }
 }

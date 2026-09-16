@@ -27,7 +27,12 @@ class ProductController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where('name', 'ilike', '%' . $request->string('search') . '%');
+            $term = $request->string('search');
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'ilike', '%' . $term . '%')
+                    ->orWhereHas('category', fn($c) => $c->where('name', 'ilike', '%' . $term . '%'))
+                    ->orWhereHas('brand', fn($b) => $b->where('name', 'ilike', '%' . $term . '%'));
+            });
         }
 
         if ($request->boolean('featured')) {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { RefreshCw } from '@lucide/vue'
 import { useSettingsStore } from '@/stores/settings'
 import { useCatalogStore } from '@/stores/catalog'
 import HeroSlider from '@/components/HeroSlider.vue'
@@ -10,7 +11,7 @@ import SkeletonCard from '@/components/SkeletonCard.vue'
 const settingsStore = useSettingsStore()
 const catalogStore = useCatalogStore()
 
-const loading = computed(() => !catalogStore.loaded)
+const loading = computed(() => !catalogStore.loaded && !catalogStore.error)
 </script>
 
 <template>
@@ -21,7 +22,8 @@ const loading = computed(() => !catalogStore.loaded)
         </h1>
         <HeroSlider v-if="catalogStore.banners.length" :banners="catalogStore.banners" />
 
-        <section v-else-if="!loading" class="relative overflow-hidden py-16 text-white sm:py-20 lg:py-28">
+        <section v-else-if="!loading && !catalogStore.error"
+            class="relative overflow-hidden py-16 text-white sm:py-20 lg:py-28">
             <div class="absolute inset-0"
                 style="background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-secondary))">
             </div>
@@ -49,14 +51,21 @@ const loading = computed(() => !catalogStore.loaded)
             </div>
         </section>
 
+        <div v-else-if="catalogStore.error"
+            class="mx-auto flex max-w-[1400px] flex-col items-center gap-3 px-4 py-24 text-center">
+            <p class="text-gray-500 dark:text-gray-400">No pudimos cargar la página. Revisa tu conexión e inténtalo de
+                nuevo.</p>
+            <button type="button"
+                class="flex items-center gap-2 rounded-full bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110"
+                @click="catalogStore.fetch()">
+                <RefreshCw class="h-4 w-4" />
+                Reintentar
+            </button>
+        </div>
+
         <template v-else>
             <section v-if="catalogStore.categories.length" class="mx-auto max-w-[1400px] px-4 py-10 sm:py-12">
                 <div class="flex items-center gap-2">
-                    <span class="flex gap-0.5">
-                        <span class="h-5 w-1.5 -skew-x-12 bg-brand-primary"></span>
-                        <span class="h-5 w-1.5 -skew-x-12 bg-brand-primary"></span>
-                        <span class="h-5 w-1.5 -skew-x-12 bg-brand-primary"></span>
-                    </span>
                     <h2
                         class="font-display text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-gray-100 sm:text-xl">
                         Conoce nuestras categorías</h2>

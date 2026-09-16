@@ -11,10 +11,10 @@ class StoreSettingController extends Controller
 {
     public function show()
     {
-        $settings = Cache::remember('public.settings', 300, function () {
-            return StoreSetting::current();
+        $data = Cache::remember('public.settings', 300, function () {
+            return (new StoreSettingResource(StoreSetting::current()))->resolve();
         });
 
-        return new StoreSettingResource($settings);
+        return response()->json(['data' => $data]);
     }
 }

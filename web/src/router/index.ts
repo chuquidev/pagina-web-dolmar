@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useThemeStore } from "@/stores/theme";
+import { trackPageView } from "@/utils/analytics";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -175,6 +176,14 @@ router.afterEach((to) => {
 let navigationCount = 0;
 router.afterEach(() => {
   navigationCount++;
+});
+
+router.afterEach((to) => {
+  if (to.path.startsWith("/admin")) return;
+  trackPageView(
+    to.fullPath,
+    typeof to.meta.title === "string" ? to.meta.title : document.title,
+  );
 });
 
 export function canGoBack() {

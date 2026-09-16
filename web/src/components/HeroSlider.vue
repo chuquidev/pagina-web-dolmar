@@ -53,7 +53,9 @@ onUnmounted(stopAutoplay)
         <div v-for="(banner, index) in banners" :key="banner.id"
             class="absolute inset-0 transition-opacity duration-700"
             :class="index === currentIndex ? 'z-10 opacity-100' : 'z-0 opacity-0'">
-            <img v-if="banner.image" :src="banner.image" :alt="banner.title ?? ''" class="h-full w-full object-cover" />
+            <img v-if="banner.image" :src="banner.image" :alt="banner.title ?? ''" class="h-full w-full object-cover"
+                :fetchpriority="index === 0 ? 'high' : 'low'" :loading="index === 0 ? 'eager' : 'lazy'"
+                :decoding="index === 0 ? 'sync' : 'async'" />
             <div v-else class="h-full w-full"
                 style="background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-secondary))">
             </div>

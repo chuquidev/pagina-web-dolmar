@@ -11,12 +11,17 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Cache::remember('public.categories', 300, function () {
+        // Cacheamos el array ya transformado (no los modelos de Eloquent): cachear
+        // objetos completos puede romperse al recuperarlos ("incomplete object" al
+        // deserializar). Un array plano es siempre seguro de guardar y leer.
+        $data = Cache::remember('public.categories', 300, function () {
             return Category::where('is_active', true)
                 ->orderBy('order')
-                ->get();
+                ->get()
+                ->map(fn(Category $category) => (new CategoryResource($category))->resolve())
+                ->all();
         });
 
-        return CategoryResource::collection($categories);
+        return response()->json(['data' => $data]);
     }
 }

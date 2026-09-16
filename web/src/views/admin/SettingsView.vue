@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { ImagePlus, Plus, X as XIcon, Trash2 } from '@lucide/vue'
+import {
+    ImagePlus, Plus, X as XIcon, Trash2, Store, Share2, MapPin, Palette, Info, Ruler, FileText,
+} from '@lucide/vue'
 import { adminSettingsService } from '@/services/admin/settings.service'
 import { useSettingsStore } from '@/stores/settings'
 import { useToastStore } from '@/stores/toast'
@@ -148,122 +150,183 @@ onMounted(async () => {
 
 <template>
     <div>
-        <h1 class="font-display text-xl font-bold text-gray-900 dark:text-gray-100 sm:text-2xl">Configuración de tienda
-        </h1>
+        <div>
+            <h1 class="font-display text-xl font-bold text-gray-900 dark:text-gray-100 sm:text-2xl">Configuración de
+                tienda</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Esta información aparece en tu sitio público.</p>
+        </div>
 
-        <form
-            class="mt-6 max-w-4xl space-y-6 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6"
-            @submit.prevent="submit">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Logo</label>
-                <div class="mt-2 flex flex-wrap items-center gap-4">
-                    <div
-                        class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
-                        <img v-if="newLogoPreview ?? settingsStore.settings?.logo"
-                            :src="newLogoPreview ?? settingsStore.settings?.logo ?? ''"
-                            class="h-full w-full object-contain" />
-                    </div>
-                    <label for="logo-input"
-                        class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
-                        <ImagePlus class="h-4 w-4" />
-                        Cambiar logo
-                    </label>
-                    <input id="logo-input" type="file" accept="image/*" class="hidden" @change="onLogoSelected" />
+        <form id="settings-form" class="mt-6 max-w-4xl space-y-5" @submit.prevent="submit">
+
+            <!-- IDENTIDAD -->
+            <section
+                class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+                <div class="flex items-center gap-2.5">
+                    <Store class="h-5 w-5 text-brand-primary" />
+                    <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Identidad</h2>
                 </div>
-                <p v-if="getError('logo')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('logo') }}
+                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Nombre, logo y contacto principal de tu
+                    negocio.
                 </p>
-            </div>
 
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre de la tienda</label>
-                    <input v-model="storeName" type="text" required
-                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-                        :class="getError('store_name') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
-                    <p v-if="getError('store_name')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
-                        getError('store_name') }}</p>
+                <div class="mt-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Logo</label>
+                    <div class="mt-2 flex flex-wrap items-center gap-4">
+                        <div
+                            class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
+                            <img v-if="newLogoPreview ?? settingsStore.settings?.logo"
+                                :src="newLogoPreview ?? settingsStore.settings?.logo ?? ''"
+                                class="h-full w-full object-contain" />
+                        </div>
+                        <label for="logo-input"
+                            class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                            <ImagePlus class="h-4 w-4" />
+                            Cambiar logo
+                        </label>
+                        <input id="logo-input" type="file" accept="image/*" class="hidden" @change="onLogoSelected" />
+                    </div>
+                    <p v-if="getError('logo')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('logo')
+                        }}
+                    </p>
                 </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">WhatsApp</label>
-                    <input v-model="whatsappNumber" type="text" required placeholder="51987654321"
-                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-                        :class="getError('whatsapp_number') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
-                    <p v-if="getError('whatsapp_number')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
-                        getError('whatsapp_number') }}</p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Correo de contacto</label>
-                    <input v-model="email" type="email" placeholder="contacto@dolmarbikes.com"
-                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-                        :class="getError('email') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
-                    <p v-if="getError('email')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('email')
-                    }}</p>
-                </div>
-            </div>
 
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Facebook (URL)</label>
-                    <input v-model="facebookUrl" type="url" placeholder="https://facebook.com/tutienda"
-                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-                        :class="getError('facebook_url') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
-                    <p v-if="getError('facebook_url')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
-                        getError('facebook_url') }}</p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Instagram (URL)</label>
-                    <input v-model="instagramUrl" type="url" placeholder="https://instagram.com/tutienda"
-                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-                        :class="getError('instagram_url') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
-                    <p v-if="getError('instagram_url')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
-                        getError('instagram_url') }}</p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">TikTok (URL)</label>
-                    <input v-model="tiktokUrl" type="url" placeholder="https://tiktok.com/@tutienda"
-                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-                        :class="getError('tiktok_url') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
-                    <p v-if="getError('tiktok_url')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
-                        getError('tiktok_url') }}</p>
-                </div>
-            </div>
-
-            <div class="grid gap-4 sm:grid-cols-2">
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
-                    <input v-model="address" type="text"
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Horario</label>
-                    <input v-model="schedule" type="text" placeholder="Lun a Sáb 9am - 7pm"
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-                </div>
-            </div>
-
-            <div class="grid gap-4 sm:grid-cols-2">
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Color primario</label>
-                    <div class="mt-1 flex items-center gap-2">
-                        <input v-model="primaryColor" type="color"
-                            class="h-10 w-14 cursor-pointer rounded border border-gray-300 dark:border-gray-700" />
-                        <input v-model="primaryColor" type="text"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre de la tienda</label>
+                        <input v-model="storeName" type="text" required
+                            class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                            :class="getError('store_name') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                        <p v-if="getError('store_name')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                            getError('store_name') }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">WhatsApp</label>
+                        <input v-model="whatsappNumber" type="text" required placeholder="51987654321"
+                            class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                            :class="getError('whatsapp_number') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                        <p v-if="getError('whatsapp_number')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                            getError('whatsapp_number') }}</p>
+                        <p v-else class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                            El botón de WhatsApp de todo tu catálogo depende de este número.
+                        </p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Correo de contacto</label>
+                        <input v-model="email" type="email" placeholder="contacto@dolmarbikes.com"
+                            class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                            :class="getError('email') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                        <p v-if="getError('email')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                            getError('email') }}</p>
                     </div>
                 </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Color secundario</label>
-                    <div class="mt-1 flex items-center gap-2">
-                        <input v-model="secondaryColor" type="color"
-                            class="h-10 w-14 cursor-pointer rounded border border-gray-300 dark:border-gray-700" />
-                        <input v-model="secondaryColor" type="text"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+            </section>
+
+            <!-- REDES SOCIALES -->
+            <section
+                class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+                <div class="flex items-center gap-2.5">
+                    <Share2 class="h-5 w-5 text-brand-primary" />
+                    <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Redes sociales
+                    </h2>
+                </div>
+                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Enlaces mostrados en el pie de página del
+                    sitio.
+                </p>
+
+                <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Facebook (URL)</label>
+                        <input v-model="facebookUrl" type="url" placeholder="https://facebook.com/tutienda"
+                            class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                            :class="getError('facebook_url') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                        <p v-if="getError('facebook_url')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                            getError('facebook_url') }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Instagram (URL)</label>
+                        <input v-model="instagramUrl" type="url" placeholder="https://instagram.com/tutienda"
+                            class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                            :class="getError('instagram_url') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                        <p v-if="getError('instagram_url')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                            getError('instagram_url') }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">TikTok (URL)</label>
+                        <input v-model="tiktokUrl" type="url" placeholder="https://tiktok.com/@tutienda"
+                            class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                            :class="getError('tiktok_url') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                        <p v-if="getError('tiktok_url')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                            getError('tiktok_url') }}</p>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="border-t border-gray-200 pt-6 dark:border-gray-800">
-                <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Sobre nosotros</h2>
+            <!-- UBICACIÓN Y HORARIO -->
+            <section
+                class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+                <div class="flex items-center gap-2.5">
+                    <MapPin class="h-5 w-5 text-brand-primary" />
+                    <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Ubicación y
+                        horario</h2>
+                </div>
+                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Se muestra en el pie de página y en "Nosotros".
+                </p>
+
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
+                        <input v-model="address" type="text"
+                            class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Horario</label>
+                        <input v-model="schedule" type="text" placeholder="Lun a Sáb 9am - 7pm"
+                            class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                    </div>
+                </div>
+            </section>
+
+            <!-- APARIENCIA -->
+            <section
+                class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+                <div class="flex items-center gap-2.5">
+                    <Palette class="h-5 w-5 text-brand-primary" />
+                    <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Apariencia</h2>
+                </div>
+                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Los colores de tu marca en el sitio público y
+                    en
+                    este panel.</p>
+
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Color primario</label>
+                        <div class="mt-1 flex items-center gap-2">
+                            <input v-model="primaryColor" type="color"
+                                class="h-10 w-14 cursor-pointer rounded border border-gray-300 dark:border-gray-700" />
+                            <input v-model="primaryColor" type="text"
+                                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Color secundario</label>
+                        <div class="mt-1 flex items-center gap-2">
+                            <input v-model="secondaryColor" type="color"
+                                class="h-10 w-14 cursor-pointer rounded border border-gray-300 dark:border-gray-700" />
+                            <input v-model="secondaryColor" type="text"
+                                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SOBRE NOSOTROS -->
+            <section
+                class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+                <div class="flex items-center gap-2.5">
+                    <Info class="h-5 w-5 text-brand-primary" />
+                    <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Sobre nosotros
+                    </h2>
+                </div>
                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Se muestra en la página pública "Nosotros".</p>
 
                 <div class="mt-4">
@@ -309,10 +372,16 @@ onMounted(async () => {
                     <input id="about-images-input" type="file" accept="image/*" multiple class="hidden"
                         @change="onAboutImagesSelected" />
                 </div>
-            </div>
+            </section>
 
-            <div class="border-t border-gray-200 pt-6 dark:border-gray-800">
-                <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Guía de tallas</h2>
+            <!-- GUÍA DE TALLAS -->
+            <section
+                class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+                <div class="flex items-center gap-2.5">
+                    <Ruler class="h-5 w-5 text-brand-primary" />
+                    <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Guía de tallas
+                    </h2>
+                </div>
                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Se muestra en la página pública "Guía de
                     tallas".</p>
 
@@ -354,10 +423,16 @@ onMounted(async () => {
                         <Plus class="h-4 w-4" />
                     </button>
                 </div>
-            </div>
+            </section>
 
-            <div class="border-t border-gray-200 pt-6 dark:border-gray-800">
-                <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Contenido legal</h2>
+            <!-- CONTENIDO LEGAL -->
+            <section
+                class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+                <div class="flex items-center gap-2.5">
+                    <FileText class="h-5 w-5 text-brand-primary" />
+                    <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Contenido legal
+                    </h2>
+                </div>
                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Se muestra en las páginas públicas de política
                     de privacidad y términos y condiciones.</p>
 
@@ -375,17 +450,21 @@ onMounted(async () => {
                             class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"></textarea>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <QrCodeGenerator :default-value="siteUrl" />
+        </form>
 
-            <div class="flex justify-end">
-                <button type="submit" :disabled="saving"
+        <!-- Barra de guardado fija: no hace falta bajar hasta el final -->
+        <div class="sticky bottom-4 z-30 mt-6 flex max-w-4xl justify-end">
+            <div
+                class="flex w-full items-center justify-end rounded-2xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur dark:border-gray-800 dark:bg-gray-900/90">
+                <button form="settings-form" type="submit" :disabled="saving"
                     class="w-full rounded-lg bg-brand-primary px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60 sm:w-auto">
                     {{ saving ? 'Guardando...' : 'Guardar cambios' }}
                 </button>
             </div>
-        </form>
+        </div>
 
         <ConfirmDialog v-if="confirmDeleteImageId !== null" title="Eliminar foto"
             message="¿Eliminar esta foto? Esta acción no se puede deshacer." @confirm="confirmRemoveAboutImage"

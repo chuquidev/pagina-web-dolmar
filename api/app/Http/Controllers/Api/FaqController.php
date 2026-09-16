@@ -11,10 +11,14 @@ class FaqController extends Controller
 {
     public function index()
     {
-        $faqs = Cache::remember('public.faqs', 300, function () {
-            return Faq::where('is_active', true)->orderBy('order')->get();
+        $data = Cache::remember('public.faqs', 300, function () {
+            return Faq::where('is_active', true)
+                ->orderBy('order')
+                ->get()
+                ->map(fn(Faq $faq) => (new FaqResource($faq))->resolve())
+                ->all();
         });
 
-        return FaqResource::collection($faqs);
+        return response()->json(['data' => $data]);
     }
 }

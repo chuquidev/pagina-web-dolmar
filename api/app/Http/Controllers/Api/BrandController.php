@@ -11,10 +11,14 @@ class BrandController extends Controller
 {
     public function index()
     {
-        $brands = Cache::remember('public.brands', 300, function () {
-            return Brand::where('is_active', true)->orderBy('name')->get();
+        $data = Cache::remember('public.brands', 300, function () {
+            return Brand::where('is_active', true)
+                ->orderBy('name')
+                ->get()
+                ->map(fn(Brand $brand) => (new BrandResource($brand))->resolve())
+                ->all();
         });
 
-        return BrandResource::collection($brands);
+        return response()->json(['data' => $data]);
     }
 }

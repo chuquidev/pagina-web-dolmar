@@ -16,7 +16,7 @@ const paragraphs = computed(() => {
 </script>
 
 <template>
-    <div class="mx-auto max-w-3xl px-4 py-10 sm:py-12">
+    <div class="mx-auto max-w-[1400px] px-4 py-6 sm:py-8">
         <h1 class="font-display text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">{{ title }}</h1>
 
         <div v-if="paragraphs.length" class="mt-6 space-y-4">

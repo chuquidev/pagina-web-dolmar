@@ -7,6 +7,7 @@ import { useCatalogStore } from '@/stores/catalog'
 import ProductCard from '@/components/ProductCard.vue'
 import SkeletonCard from '@/components/SkeletonCard.vue'
 import Breadcrumbs from '@/components/Breadcrumbs.vue'
+import Pagination from '@/components/Pagination.vue'
 import type { Product } from '@/types/catalog'
 
 const route = useRoute()
@@ -14,6 +15,7 @@ const router = useRouter()
 const catalogStore = useCatalogStore()
 
 const products = ref<Product[]>([])
+const total = ref(0)
 const currentPage = ref(1)
 const lastPage = ref(1)
 const loading = ref(false)
@@ -45,6 +47,7 @@ async function loadProducts() {
         page: Number(route.query.page) || 1,
     })
     products.value = response.data
+    total.value = response.meta.total
     currentPage.value = response.meta.current_page
     lastPage.value = response.meta.last_page
     loading.value = false
@@ -56,6 +59,7 @@ function updateFilter(partial: Record<string, string | undefined>) {
 
 function updatePage(page: number) {
     router.push({ query: { ...route.query, page } })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 watch(() => route.query, loadProducts, { immediate: true, deep: true })
@@ -109,12 +113,6 @@ watch(() => route.query, loadProducts, { immediate: true, deep: true })
             <ProductCard v-for="product in products" :key="product.id" :product="product" />
         </div>
 
-        <div v-if="lastPage > 1" class="mt-8 flex flex-wrap justify-center gap-2">
-            <button v-for="page in lastPage" :key="page" class="h-9 w-9 rounded-full text-sm"
-                :class="page === currentPage ? 'bg-brand-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'"
-                @click="updatePage(page)">
-                {{ page }}
-            </button>
-        </div>
+        <Pagination :current-page="currentPage" :last-page="lastPage" :total="total" @change="updatePage" />
     </div>
 </template>

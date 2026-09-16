@@ -8,7 +8,7 @@ defineProps<{ category: Category }>()
 <template>
     <RouterLink :to="{ path: '/catalogo', query: { category: category.slug } }" class="group block">
         <div class="relative aspect-square overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800">
-            <img v-if="category.image" :src="category.image" :alt="category.name" loading="lazy"
+            <img v-if="category.image" :src="category.image" :alt="category.name" loading="lazy" decoding="async"
                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
             <div v-else
                 class="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-primary to-brand-secondary">
