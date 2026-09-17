@@ -22,8 +22,11 @@ function ensureScriptLoaded() {
   document.head.appendChild(script);
 
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag(...args: unknown[]) {
-    window.dataLayer.push(args);
+  window.gtag = function () {
+    // Usamos 'arguments' (no un array armado a mano) porque es la forma
+    // exacta que gtag.js reconoce internamente para procesar comandos.
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer.push(arguments);
   };
   window.gtag("js", new Date());
 
