@@ -27,6 +27,16 @@ function ensureScriptLoaded() {
   };
   window.gtag("js", new Date());
 
+  // El Modo de Consentimiento de Google bloquea el envío de eventos
+  // personalizados si no se le indica explícitamente que hay permiso
+  // para medir. No usamos cookies de publicidad, solo de analítica.
+  window.gtag("consent", "default", {
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+    analytics_storage: "granted",
+  });
+
   // Enviamos la vista de página nosotros mismos en cada cambio de ruta
   // (es una SPA, gtag por sí solo solo detecta la primera carga).
   window.gtag("config", GA_ID, { send_page_view: false });
