@@ -15,6 +15,7 @@ import SkeletonProductDetail from '@/components/SkeletonProductDetail.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import type { Product } from '@/types/catalog'
 import { useHead } from '@unhead/vue'
+import { trackEvent } from '@/utils/analytics'
 
 const props = defineProps<{ slug: string }>()
 const settingsStore = useSettingsStore()
@@ -96,6 +97,16 @@ const whatsappUrl = computed(() => {
     return buildWhatsAppUrl(settingsStore.settings.whatsapp_number, message)
 })
 
+function trackWhatsappClick() {
+    if (!product.value) return
+    trackEvent('generate_lead', {
+        currency: 'PEN',
+        value: Number(product.value.sale_price ?? product.value.price),
+        source: 'product_page',
+        item_name: product.value.name,
+    })
+}
+
 async function share() {
     const url = window.location.href
     if (navigator.share) {
@@ -112,7 +123,7 @@ watch(() => props.slug, loadProduct)
 </script>
 
 <template>
-    <div class="mx-auto max-w-[1400px] px-4 py-6 sm:py-8">
+    <div class="mx-auto max-w-[1400px] px-4 py-6 sm:py-10">
         <button
             class="mb-4 flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-brand-primary dark:text-gray-300 sm:mb-6"
             @click="goBack">
@@ -175,7 +186,8 @@ watch(() => props.slug, loadProduct)
                     </div>
 
                     <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                        <a v-if="whatsappUrl" :href="whatsappUrl" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3 font-display
+                        <a v-if="whatsappUrl" :href="whatsappUrl" target="_blank" rel="noopener"
+                            @click="trackWhatsappClick" class="flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3 font-display
                         font-semibold
                         text-white transition hover:brightness-95">
                             <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor">

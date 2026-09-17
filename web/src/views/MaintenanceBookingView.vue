@@ -10,6 +10,7 @@ import { buildWhatsAppUrl } from '@/utils/whatsapp'
 import { formatCurrency } from '@/utils/currency'
 import Breadcrumbs from '@/components/Breadcrumbs.vue'
 import type { MaintenanceService, MaintenanceAppointment } from '@/types/catalog'
+import { trackEvent } from '@/utils/analytics'
 
 useHead(() => ({ title: 'Reservar mantenimiento' }))
 
@@ -77,6 +78,13 @@ async function submit() {
             bike_info: bikeInfo.value || undefined,
         })
         toastStore.success('¡Cita reservada con éxito!')
+
+        const service = services.value.find((s) => s.id === selectedServiceId.value)
+        trackEvent('book_maintenance', {
+            currency: 'PEN',
+            value: service?.price ? Number(service.price) : undefined,
+            item_name: service?.name,
+        })
     } catch (err) {
         const message = parseErrors(err)
         toastStore.error(message)
@@ -112,7 +120,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="mx-auto max-w-[1400px] px-4 py-6 sm:py-8">
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:py-12">
         <Breadcrumbs :items="[{ label: 'Inicio', to: '/' }, { label: 'Reservar mantenimiento' }]" />
 
         <h1 class="font-display text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">Reserva tu

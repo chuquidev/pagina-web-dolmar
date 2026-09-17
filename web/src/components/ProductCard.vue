@@ -5,6 +5,7 @@ import type { Product } from '@/types/catalog'
 import { useSettingsStore } from '@/stores/settings'
 import { useCartStore } from '@/stores/cart'
 import { buildWhatsAppUrl } from '@/utils/whatsapp'
+import { trackEvent } from '@/utils/analytics'
 import PriceTag from './PriceTag.vue'
 import AvailabilityBadge from './AvailabilityBadge.vue'
 import DiscountBadge from './DiscountBadge.vue'
@@ -22,6 +23,15 @@ const quickWhatsappUrl = computed(() => {
     const productUrl = `${window.location.origin}/producto/${props.product.slug}`
     return buildWhatsAppUrl(phone, `Hola, me interesa este producto: ${props.product.name}.\n${productUrl}`)
 })
+
+function trackWhatsappClick() {
+    trackEvent('generate_lead', {
+        currency: 'PEN',
+        value: Number(props.product.sale_price ?? props.product.price),
+        source: 'product_card',
+        item_name: props.product.name,
+    })
+}
 
 function addToCart() {
     cartStore.addItem(props.product, 1)
@@ -62,7 +72,7 @@ function addToCart() {
             </button>
 
             <a v-if="quickWhatsappUrl" :href="quickWhatsappUrl" target="_blank" rel="noopener"
-                aria-label="Consultar por WhatsApp" class="absolute bottom-2 right-2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-[#25D366]
+                @click.stop="trackWhatsappClick" aria-label="Consultar por WhatsApp" class="absolute bottom-2 right-2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-[#25D366]
             text-white shadow-md transition-transform hover:scale-110">
                 <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor">
                     <path

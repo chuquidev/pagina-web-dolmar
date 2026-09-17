@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import type { Product } from "@/types/catalog";
+import { trackEvent } from "@/utils/analytics";
 
 export interface CartItem {
   product: Product;
@@ -42,6 +43,21 @@ export const useCartStore = defineStore("cart", {
         this.items.push({ product, quantity });
       }
       this.persist();
+
+      const price = Number(product.sale_price ?? product.price);
+      trackEvent("add_to_cart", {
+        currency: "PEN",
+        value: price * quantity,
+        items: [
+          {
+            item_id: String(product.id),
+            item_name: product.name,
+            item_category: product.category.name,
+            price,
+            quantity,
+          },
+        ],
+      });
     },
     updateQuantity(productId: number, quantity: number) {
       const item = this.items.find((i) => i.product.id === productId);

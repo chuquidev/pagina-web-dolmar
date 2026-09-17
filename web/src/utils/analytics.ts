@@ -45,3 +45,15 @@ export function trackPageView(path: string, title?: string) {
     page_location: window.location.href,
   });
 }
+
+/**
+ * Registra una acción de negocio (agregar al carrito, escribir por
+ * WhatsApp, reservar mantenimiento). Usa nombres de evento recomendados
+ * por GA4 (add_to_cart, generate_lead) cuando aplica, para aprovechar
+ * los informes de monetización ya armados de Analytics.
+ */
+export function trackEvent(name: string, params?: Record<string, unknown>) {
+  if (!GA_ID) return;
+  ensureScriptLoaded();
+  window.gtag("event", name, params);
+}
