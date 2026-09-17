@@ -26,10 +26,9 @@ class MaintenanceAppointmentController extends Controller
                 ->where('starts_at', '<', $endsAt)
                 ->where('ends_at', '>', $startsAt)
                 ->lockForUpdate()
-                ->get()
-                ->count();
+                ->get(['id']);
 
-            if ($overlapping >= $settings->capacity) {
+            if ($overlapping->count() >= $settings->capacity) {
                 return response()->json([
                     'message' => 'Ese horario ya no está disponible. Por favor elige otro.',
                 ], 422);
