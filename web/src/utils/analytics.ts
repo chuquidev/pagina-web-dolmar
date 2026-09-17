@@ -6,15 +6,15 @@ declare global {
   interface Window {
     dataLayer: unknown[];
     gtag: (...args: unknown[]) => void;
+    __gaInitialized?: boolean;
   }
 }
 
 const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined;
-let scriptLoaded = false;
 
 function ensureScriptLoaded() {
-  if (scriptLoaded || !GA_ID) return;
-  scriptLoaded = true;
+  if (!GA_ID || window.__gaInitialized) return;
+  window.__gaInitialized = true;
 
   const script = document.createElement("script");
   script.async = true;
