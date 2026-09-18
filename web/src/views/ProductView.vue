@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Share2, Check, ArrowLeft, ShoppingCart, Plus, Minus } from '@lucide/vue'
+import { Share2, Check, ArrowLeft, ShoppingCart, Plus, Minus, PackageX } from '@lucide/vue'
 import { catalogService } from '@/services/catalog.service'
 import { useSettingsStore } from '@/stores/settings'
 import { useCartStore } from '@/stores/cart'
@@ -30,6 +30,35 @@ const copied = ref(false)
 const quantity = ref(1)
 const justAdded = ref(false)
 
+// Datos estructurados (schema.org Product) para que Google pueda mostrar
+// precio y disponibilidad directamente en los resultados de búsqueda.
+const productJsonLd = computed(() => {
+    if (!product.value) return null
+
+    const p = product.value
+    const finalPrice = Number(p.sale_price ?? p.price)
+
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: p.name,
+        description: p.description || undefined,
+        sku: p.sku || undefined,
+        image: p.images.map((img) => img.large),
+        brand: p.brand ? { '@type': 'Brand', name: p.brand.name } : undefined,
+        offers: {
+            '@type': 'Offer',
+            url: window.location.href,
+            priceCurrency: 'PEN',
+            price: finalPrice,
+            availability:
+                p.availability === 'out_of_stock'
+                    ? 'https://schema.org/OutOfStock'
+                    : 'https://schema.org/InStock',
+        },
+    }
+})
+
 useHead(() => ({
     title: product.value ? `${product.value.name} — ${settingsStore.settings?.store_name ?? ''}` : 'Producto',
     meta: [
@@ -39,6 +68,9 @@ useHead(() => ({
         { property: 'og:image', content: product.value?.images[0]?.large },
         { property: 'og:type', content: 'product' },
     ],
+    script: productJsonLd.value
+        ? [{ type: 'application/ld+json', innerHTML: JSON.stringify(productJsonLd.value) }]
+        : [],
 }))
 
 const breadcrumbItems = computed(() => {
@@ -121,6 +153,7 @@ async function share() {
 onMounted(loadProduct)
 watch(() => props.slug, loadProduct)
 </script>
+
 
 <template>
     <div class="mx-auto max-w-[1400px] px-4 py-6 sm:py-10">
