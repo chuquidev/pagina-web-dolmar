@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { Package, FolderTree, Star, ImageOff, Percent, Power, Clock } from '@lucide/vue'
+import { Package, FolderTree, Star, ImageOff, Percent, Power, Clock, Calendar, AlertTriangle } from '@lucide/vue'
 import { adminDashboardService, type DashboardStats } from '@/services/admin/dashboard.service'
 import { useAuthStore } from '@/stores/auth'
 import StatCard from '@/components/admin/StatCard.vue'
@@ -35,6 +35,15 @@ onMounted(async () => {
                 <div class="h-64 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
                 </div>
                 <div class="h-64 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+                </div>
+                <div
+                    class="h-64 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:col-span-2">
+                </div>
+            </div>
+            <div class="mt-6 grid gap-4 lg:grid-cols-2">
+                <div class="h-56 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+                </div>
+                <div class="h-56 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
                 </div>
             </div>
             <div class="mt-6 h-56 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
@@ -89,6 +98,86 @@ onMounted(async () => {
                     <div class="mt-5">
                         <BarChart :data="stats.products_by_category.map((c) => ({ label: c.name, value: c.count }))" />
                     </div>
+                </div>
+
+                <div
+                    class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6 lg:col-span-2">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Citas de
+                                mantenimiento — próximos 7 días</h2>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{
+                                stats.upcoming_appointments_count
+                                }} cita{{ stats.upcoming_appointments_count === 1 ? '' : 's' }} pendiente{{
+                                    stats.upcoming_appointments_count === 1 ? '' : 's' }} en total.</p>
+                        </div>
+                        <RouterLink to="/admin/appointments"
+                            class="text-sm font-medium text-brand-primary hover:underline">Ver todas</RouterLink>
+                    </div>
+                    <div class="mt-5">
+                        <BarChart
+                            :data="stats.appointments_next_7_days.map((d) => ({ label: d.label, value: d.count }))" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Próximas citas + stock bajo -->
+            <div class="mt-6 grid gap-4 lg:grid-cols-2">
+                <div
+                    class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Próximas
+                            citas</h2>
+                        <RouterLink to="/admin/appointments"
+                            class="text-sm font-medium text-brand-primary hover:underline">Ver todas</RouterLink>
+                    </div>
+                    <ul v-if="stats.next_appointments.length"
+                        class="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
+                        <li v-for="appt in stats.next_appointments" :key="appt.id" class="flex items-center gap-3 py-3">
+                            <div
+                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-primary/10 text-brand-primary">
+                                <Calendar class="h-5 w-5" />
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{{
+                                    appt.customer_name }}</p>
+                                <p class="truncate text-xs text-gray-400 dark:text-gray-500">{{ appt.service }}</p>
+                            </div>
+                            <span class="shrink-0 text-xs text-gray-500 dark:text-gray-400">{{ appt.starts_at }}</span>
+                        </li>
+                    </ul>
+                    <p v-else class="mt-4 text-sm text-gray-400 dark:text-gray-500">No tienes citas próximas.</p>
+                </div>
+
+                <div
+                    class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 sm:p-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="font-display text-base font-semibold text-gray-900 dark:text-gray-100">Stock bajo
+                        </h2>
+                        <RouterLink to="/admin/products" class="text-sm font-medium text-brand-primary hover:underline">
+                            Ver productos</RouterLink>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Productos con inventario rastreado a punto
+                        de agotarse.</p>
+                    <ul v-if="stats.low_stock_products.length"
+                        class="mt-4 divide-y divide-gray-100 dark:divide-gray-800">
+                        <li v-for="p in stats.low_stock_products" :key="p.id" class="flex items-center gap-3 py-3">
+                            <div
+                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+                                <AlertTriangle class="h-5 w-5" />
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">{{ p.name }}
+                                </p>
+                                <p class="truncate text-xs text-gray-400 dark:text-gray-500">{{ p.sku ?? 'Sin código'
+                                }}</p>
+                            </div>
+                            <span class="shrink-0 text-sm font-semibold text-amber-600 dark:text-amber-400">{{ p.stock
+                            }} u.</span>
+                        </li>
+                    </ul>
+                    <p v-else class="mt-4 text-sm text-gray-400 dark:text-gray-500">Ningún producto con inventario
+                        rastreado está por agotarse.</p>
                 </div>
             </div>
 

@@ -24,6 +24,21 @@ export interface DashboardStats {
     created_at: string;
     thumb: string | null;
   }[];
+  low_stock_products: {
+    id: number;
+    name: string;
+    sku: string | null;
+    stock: number;
+  }[];
+  appointments_next_7_days: { label: string; count: number }[];
+  upcoming_appointments_count: number;
+  next_appointments: {
+    id: number;
+    customer_name: string;
+    service: string;
+    starts_at: string;
+    status: string;
+  }[];
 }
 
 export const adminDashboardService = {

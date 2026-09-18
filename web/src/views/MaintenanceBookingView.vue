@@ -120,7 +120,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="mx-auto max-w-7xl px-4 py-10 sm:py-12">
+    <div class="mx-auto max-w-[1400px] px-4 py-6 sm:py-8">
         <Breadcrumbs :items="[{ label: 'Inicio', to: '/' }, { label: 'Reservar mantenimiento' }]" />
 
         <h1 class="font-display text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">Reserva tu
@@ -129,7 +129,7 @@ onMounted(async () => {
             convenga.</p>
 
         <div v-if="confirmedAppointment"
-            class="mt-8 rounded-2xl border border-green-200 bg-green-50 p-6 text-center dark:border-green-900 dark:bg-green-950/30">
+            class="mx-auto mt-8 max-w-md rounded-2xl border border-green-200 bg-green-50 p-6 text-center dark:border-green-900 dark:bg-green-950/30">
             <div
                 class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
                 <Check class="h-6 w-6" />
@@ -149,88 +149,102 @@ onMounted(async () => {
             </a>
         </div>
 
-        <form v-else class="mt-8 space-y-8" @submit.prevent="submit">
-            <div>
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">1. Elige un servicio</h2>
-                <div v-if="loadingServices" class="mt-3 text-sm text-gray-400 dark:text-gray-500">Cargando servicios...
+        <form v-else class="mt-8 grid gap-8 lg:grid-cols-[1.3fr_1fr] lg:items-start" @submit.prevent="submit">
+            <div class="space-y-8">
+                <div>
+                    <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">1. Elige un servicio</h2>
+                    <div v-if="loadingServices" class="mt-3 text-sm text-gray-400 dark:text-gray-500">Cargando
+                        servicios...
+                    </div>
+                    <div v-else-if="!services.length" class="mt-3 text-sm text-gray-400 dark:text-gray-500">Aún no hay
+                        servicios disponibles.</div>
+                    <div v-else class="mt-3 grid gap-3 sm:grid-cols-2">
+                        <button v-for="service in services" :key="service.id" type="button"
+                            class="rounded-xl border p-4 text-left transition" :class="selectedServiceId === service.id
+                                ? 'border-brand-primary bg-brand-primary/5'
+                                : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
+                                " @click="selectedServiceId = service.id">
+                            <div class="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                                <Wrench class="h-4 w-4 text-brand-primary" />
+                                <span class="font-medium">{{ service.name }}</span>
+                            </div>
+                            <p v-if="service.description" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{
+                                service.description }}</p>
+                            <div class="mt-2 flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+                                <span class="flex items-center gap-1">
+                                    <Clock class="h-3.5 w-3.5" /> {{ formatDuration(service.duration_minutes) }}
+                                </span>
+                                <span v-if="service.price">{{ formatCurrency(service.price) }}</span>
+                            </div>
+                        </button>
+                    </div>
                 </div>
-                <div v-else-if="!services.length" class="mt-3 text-sm text-gray-400 dark:text-gray-500">Aún no hay
-                    servicios disponibles.</div>
-                <div v-else class="mt-3 grid gap-3 sm:grid-cols-2">
-                    <button v-for="service in services" :key="service.id" type="button"
-                        class="rounded-xl border p-4 text-left transition" :class="selectedServiceId === service.id
-                            ? 'border-brand-primary bg-brand-primary/5'
-                            : 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600'
-                            " @click="selectedServiceId = service.id">
-                        <div class="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                            <Wrench class="h-4 w-4 text-brand-primary" />
-                            <span class="font-medium">{{ service.name }}</span>
+
+                <div v-if="selectedServiceId">
+                    <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">2. Elige una fecha</h2>
+                    <input v-model="selectedDate" type="date" :min="minDate" :max="maxDate" required
+                        class="mt-3 w-full max-w-xs rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                </div>
+
+                <div v-if="selectedServiceId && selectedDate">
+                    <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">3. Elige un horario</h2>
+                    <div v-if="loadingSlots" class="mt-3 text-sm text-gray-400 dark:text-gray-500">Buscando horarios
+                        disponibles...</div>
+                    <div v-else-if="!availableSlots.length" class="mt-3 text-sm text-gray-400 dark:text-gray-500">
+                        No hay horarios disponibles ese día. Prueba con otra fecha.
+                    </div>
+                    <div v-else class="mt-3 flex flex-wrap gap-2">
+                        <button v-for="slot in availableSlots" :key="slot" type="button"
+                            class="rounded-full border px-4 py-2 text-sm transition" :class="selectedTime === slot
+                                ? 'border-brand-primary bg-brand-primary text-white'
+                                : 'border-gray-200 text-gray-700 hover:border-brand-primary hover:text-brand-primary dark:border-gray-700 dark:text-gray-300'
+                                " @click="selectedTime = slot">
+                            {{ slot }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 lg:sticky lg:top-24">
+                <template v-if="selectedTime">
+                    <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">4. Tus datos</h2>
+                    <div class="mt-4 space-y-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre completo</label>
+                            <input v-model="customerName" type="text" required
+                                class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                                :class="getError('customer_name') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                            <p v-if="getError('customer_name')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                                getError('customer_name') }}</p>
                         </div>
-                        <p v-if="service.description" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{
-                            service.description }}</p>
-                        <div class="mt-2 flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
-                            <span class="flex items-center gap-1">
-                                <Clock class="h-3.5 w-3.5" /> {{ formatDuration(service.duration_minutes) }}
-                            </span>
-                            <span v-if="service.price">{{ formatCurrency(service.price) }}</span>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">WhatsApp /
+                                Teléfono</label>
+                            <input v-model="customerPhone" type="text" required placeholder="987654321"
+                                class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+                                :class="getError('customer_phone') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
+                            <p v-if="getError('customer_phone')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
+                                getError('customer_phone') }}</p>
                         </div>
-                    </button>
-                </div>
-            </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Modelo de tu bicicleta
+                                (opcional)</label>
+                            <input v-model="bikeInfo" type="text" placeholder="Ej: MTB aro 29, marca Trek"
+                                class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
+                        </div>
 
-            <div v-if="selectedServiceId">
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">2. Elige una fecha</h2>
-                <input v-model="selectedDate" type="date" :min="minDate" :max="maxDate" required
-                    class="mt-3 w-full max-w-xs rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-            </div>
+                        <button type="submit" :disabled="submitting"
+                            class="w-full rounded-full bg-brand-primary py-3 font-display font-semibold text-white transition hover:brightness-110 disabled:opacity-60">
+                            {{ submitting ? 'Reservando...' : 'Reservar cita' }}
+                        </button>
+                    </div>
+                </template>
 
-            <div v-if="selectedServiceId && selectedDate">
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">3. Elige un horario</h2>
-                <div v-if="loadingSlots" class="mt-3 text-sm text-gray-400 dark:text-gray-500">Buscando horarios
-                    disponibles...</div>
-                <div v-else-if="!availableSlots.length" class="mt-3 text-sm text-gray-400 dark:text-gray-500">
-                    No hay horarios disponibles ese día. Prueba con otra fecha.
+                <div v-else class="flex flex-col items-center py-6 text-center text-gray-400 dark:text-gray-500">
+                    <Wrench class="h-8 w-8" />
+                    <p class="mt-3 text-sm">Completa los pasos anteriores para dejar tus datos y confirmar la cita.</p>
                 </div>
-                <div v-else class="mt-3 flex flex-wrap gap-2">
-                    <button v-for="slot in availableSlots" :key="slot" type="button"
-                        class="rounded-full border px-4 py-2 text-sm transition" :class="selectedTime === slot
-                            ? 'border-brand-primary bg-brand-primary text-white'
-                            : 'border-gray-200 text-gray-700 hover:border-brand-primary hover:text-brand-primary dark:border-gray-700 dark:text-gray-300'
-                            " @click="selectedTime = slot">
-                        {{ slot }}
-                    </button>
-                </div>
-            </div>
-
-            <div v-if="selectedTime" class="space-y-4">
-                <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">4. Tus datos</h2>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Nombre completo</label>
-                    <input v-model="customerName" type="text" required
-                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-                        :class="getError('customer_name') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
-                    <p v-if="getError('customer_name')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
-                        getError('customer_name') }}</p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">WhatsApp / Teléfono</label>
-                    <input v-model="customerPhone" type="text" required placeholder="987654321"
-                        class="mt-1 w-full rounded-lg border px-3 py-2 text-sm text-gray-900 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
-                        :class="getError('customer_phone') ? 'border-red-400 dark:border-red-700' : 'border-gray-300 focus:border-brand-primary dark:border-gray-700'" />
-                    <p v-if="getError('customer_phone')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{
-                        getError('customer_phone') }}</p>
-                </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Modelo de tu bicicleta
-                        (opcional)</label>
-                    <input v-model="bikeInfo" type="text" placeholder="Ej: MTB aro 29, marca Trek"
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-brand-primary focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100" />
-                </div>
-
-                <button type="submit" :disabled="submitting"
-                    class="w-full rounded-full bg-brand-primary py-3 font-display font-semibold text-white transition hover:brightness-110 disabled:opacity-60 sm:w-auto sm:px-8">
-                    {{ submitting ? 'Reservando...' : 'Reservar cita' }}
-                </button>
             </div>
         </form>
     </div>

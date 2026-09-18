@@ -156,7 +156,7 @@ onMounted(async () => {
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Esta información aparece en tu sitio público.</p>
         </div>
 
-        <form id="settings-form" class="mt-6 max-w-4xl space-y-5" @submit.prevent="submit">
+        <form id="settings-form" class="mt-6 space-y-5" @submit.prevent="submit">
 
             <!-- IDENTIDAD -->
             <section
@@ -186,7 +186,7 @@ onMounted(async () => {
                         <input id="logo-input" type="file" accept="image/*" class="hidden" @change="onLogoSelected" />
                     </div>
                     <p v-if="getError('logo')" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ getError('logo')
-                        }}
+                    }}
                     </p>
                 </div>
 
@@ -398,9 +398,15 @@ onMounted(async () => {
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                             <tr v-for="(row, i) in sizeGuide" :key="i">
-                                <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ row.height }}</td>
-                                <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ row.size }}</td>
-                                <td class="px-3 py-2 text-right">
+                                <td class="px-3 py-1.5">
+                                    <input v-model="row.height"
+                                        class="w-full rounded-md border-0 bg-transparent px-2 py-1.5 text-sm text-gray-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-primary dark:text-gray-300 dark:focus:bg-gray-800" />
+                                </td>
+                                <td class="px-3 py-1.5">
+                                    <input v-model="row.size"
+                                        class="w-full rounded-md border-0 bg-transparent px-2 py-1.5 text-sm text-gray-700 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-primary dark:text-gray-300 dark:focus:bg-gray-800" />
+                                </td>
+                                <td class="px-3 py-1.5 text-right">
                                     <button type="button" class="text-gray-400 hover:text-red-500"
                                         @click="removeSizeRow(i)">
                                         <XIcon class="h-4 w-4" />
@@ -410,6 +416,8 @@ onMounted(async () => {
                         </tbody>
                     </table>
                 </div>
+                <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">Haz clic en cualquier celda para editarla
+                    directamente. Recuerda "Guardar cambios" al final.</p>
 
                 <div class="mt-3 flex flex-wrap gap-2">
                     <input v-model="newSizeHeight" type="text" placeholder="Ej: 150 - 160 cm"
@@ -456,9 +464,9 @@ onMounted(async () => {
         </form>
 
         <!-- Barra de guardado fija: no hace falta bajar hasta el final -->
-        <div class="sticky bottom-4 z-30 mt-6 flex max-w-4xl justify-end">
+        <div class="sticky bottom-4 z-30 mt-6 flex justify-end">
             <div
-                class="flex w-full items-center justify-end rounded-2xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur dark:border-gray-800 dark:bg-gray-900/90">
+                class="flex items-center justify-end rounded-2xl border border-gray-200 bg-white/90 p-3 shadow-lg backdrop-blur dark:border-gray-800 dark:bg-gray-900/90">
                 <button form="settings-form" type="submit" :disabled="saving"
                     class="w-full rounded-lg bg-brand-primary px-6 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60 sm:w-auto">
                     {{ saving ? 'Guardando...' : 'Guardar cambios' }}

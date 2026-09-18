@@ -133,7 +133,7 @@ onMounted(load)
                     </p>
                 </div>
 
-                <div class="space-y-2">
+                <div class="grid gap-2 lg:grid-cols-2 lg:gap-3">
 
                     <!-- DÍA -->
                     <div v-for="day in days" :key="day.key"

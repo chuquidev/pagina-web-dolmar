@@ -10,7 +10,12 @@ let autoplayTimer: ReturnType<typeof setInterval> | null = null
 let touchStartX = 0
 
 function isExternal(url: string) {
-    return url.startsWith('http')
+    if (!url.startsWith('http')) return false
+    return !url.startsWith(window.location.origin)
+}
+
+function internalPath(url: string) {
+    return url.startsWith(window.location.origin) ? url.slice(window.location.origin.length) || '/' : url
 }
 
 function goTo(index: number) {
@@ -78,7 +83,7 @@ onUnmounted(stopAutoplay)
                         lg:mt-6 lg:px-6 lg:py-3 lg:text-base">
                             {{ banner.button_text }}
                         </a>
-                        <RouterLink v-else :to="banner.button_url"
+                        <RouterLink v-else :to="internalPath(banner.button_url)"
                             class="mt-2 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 font-display text-xs font-semibold text-gray-900 transition hover:bg-gray-100 sm:mt-4 sm:px-5 sm:py-2 sm:text-sm lg:mt-6 lg:px-6 lg:py-3 lg:text-base">
                             {{ banner.button_text }}
                         </RouterLink>
