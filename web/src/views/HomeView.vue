@@ -70,9 +70,8 @@ const loading = computed(() => !catalogStore.loaded && !catalogStore.error)
                         class="font-display text-lg font-bold uppercase tracking-wide text-gray-900 dark:text-gray-100 sm:text-xl">
                         Conoce nuestras categorías</h2>
                 </div>
-                <div class="mt-6 flex flex-wrap gap-4 sm:gap-5">
-                    <CategoryCard v-for="category in catalogStore.categories" :key="category.id" :category="category"
-                        class="w-[calc(50%-0.5rem)] sm:w-[190px] lg:w-[220px]" />
+                <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-6">
+                    <CategoryCard v-for="category in catalogStore.categories" :key="category.id" :category="category" />
                 </div>
             </section>
 

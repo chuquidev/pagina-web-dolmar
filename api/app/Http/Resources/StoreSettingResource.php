@@ -28,7 +28,7 @@ class StoreSettingResource extends JsonResource
             'about_images' => $this->getMedia('about')->map(fn($m) => [
                 'id' => $m->id,
                 'url' => $m->hasGeneratedConversion('gallery') ? $m->getUrl('gallery') : $m->getUrl(),
-            ]),
+            ])->all(),
         ];
     }
 }

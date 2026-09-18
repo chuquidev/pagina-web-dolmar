@@ -29,7 +29,7 @@ class ProductResource extends JsonResource
                 'id' => $media->id,
                 'thumb' => $media->hasGeneratedConversion('thumb') ? $media->getUrl('thumb') : $media->getUrl(),
                 'large' => $media->hasGeneratedConversion('large') ? $media->getUrl('large') : $media->getUrl(),
-            ]),
+            ])->all(),
         ];
     }
 }
