@@ -166,8 +166,27 @@ watch(() => props.slug, loadProduct)
 
         <SkeletonProductDetail v-if="loading" />
 
-        <div v-else-if="notFound" class="py-24 text-center text-gray-400 dark:text-gray-500">Este producto ya no está
-            disponible.</div>
+        <div v-else-if="notFound" class="flex flex-col items-center px-4 py-16 text-center sm:py-24">
+            <div
+                class="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500">
+                <PackageX class="h-9 w-9" />
+            </div>
+            <h1 class="mt-6 font-display text-xl font-bold text-gray-900 dark:text-gray-100 sm:text-2xl">Este producto
+                ya no está disponible</h1>
+            <p class="mt-2 max-w-sm text-sm text-gray-500 dark:text-gray-400">
+                Puede que se haya agotado o que el enlace ya no sea válido. Prueba con el catálogo completo.
+            </p>
+            <div class="mt-8 flex flex-wrap justify-center gap-3">
+                <RouterLink to="/catalogo"
+                    class="rounded-full bg-brand-primary px-6 py-2.5 font-display text-sm font-semibold text-white transition hover:brightness-110">
+                    Ver catálogo
+                </RouterLink>
+                <RouterLink to="/"
+                    class="rounded-full border border-gray-200 px-6 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                    Ir al inicio
+                </RouterLink>
+            </div>
+        </div>
 
         <template v-else-if="product">
             <Breadcrumbs :items="breadcrumbItems" />
