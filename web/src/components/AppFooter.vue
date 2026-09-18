@@ -30,8 +30,7 @@ const currentYear = new Date().getFullYear()
                         <span class="font-display font-semibold text-gray-900 dark:text-gray-100">{{
                             settingsStore.settings?.store_name }}</span>
                     </div>
-                    <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Catálogo online — consulta y compra directo
-                        por WhatsApp.</p>
+                    <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Más que bicicletas, estilo de vida — consulta y compra directo por WhatsApp..</p>
                 </div>
 
                 <div>
