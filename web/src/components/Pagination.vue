@@ -31,31 +31,39 @@ function go(page: number) {
 </script>
 
 <template>
-    <div v-if="lastPage > 1" class="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <p v-if="total !== undefined" class="text-xs text-gray-400 dark:text-gray-500">
-            Página {{ currentPage }} de {{ lastPage }} · {{ total }} resultado{{ total === 1 ? '' : 's' }}
+    <nav v-if="lastPage > 1" class="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+        <p v-if="total !== undefined" class="text-sm text-gray-500 dark:text-gray-400">
+            Página <span class="font-medium text-gray-900 dark:text-gray-100">{{ currentPage }}</span> de {{ lastPage }}
+            <span class="text-gray-300 dark:text-gray-700">·</span>
+            {{ total }} resultado{{ total === 1 ? '' : 's' }}
         </p>
-        <div class="flex flex-wrap items-center gap-1.5">
+
+        <div
+            class="flex items-center gap-0.5 rounded-full border border-gray-200 bg-white p-1 dark:border-gray-800 dark:bg-gray-900">
             <button type="button" :disabled="currentPage === 1"
-                class="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-30 dark:text-gray-400 dark:hover:bg-gray-800"
+                class="flex h-8 items-center gap-1 rounded-full px-3 text-sm font-medium text-gray-600 transition hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-30 dark:text-gray-300 dark:hover:bg-gray-800"
                 aria-label="Página anterior" @click="go(currentPage - 1)">
                 <ChevronLeft class="h-4 w-4" />
+                <span class="hidden sm:inline">Anterior</span>
             </button>
 
             <template v-for="(page, i) in pages" :key="i">
-                <span v-if="page === '...'" class="w-9 text-center text-sm text-gray-400 dark:text-gray-600">…</span>
-                <button v-else type="button" class="h-9 w-9 rounded-full text-sm transition" :class="page === currentPage
-                    ? 'bg-brand-primary font-semibold text-white'
-                    : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'" @click="go(page)">
+                <span v-if="page === '...'" class="w-8 text-center text-sm text-gray-400 dark:text-gray-600">…</span>
+                <button v-else type="button" class="h-8 min-w-8 rounded-full px-2.5 text-sm font-medium transition"
+                    :class="page === currentPage
+                        ? 'bg-brand-primary text-white shadow-sm'
+                        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'"
+                    :aria-current="page === currentPage ? 'page' : undefined" @click="go(page)">
                     {{ page }}
                 </button>
             </template>
 
             <button type="button" :disabled="currentPage === lastPage"
-                class="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-30 dark:text-gray-400 dark:hover:bg-gray-800"
+                class="flex h-8 items-center gap-1 rounded-full px-3 text-sm font-medium text-gray-600 transition hover:bg-gray-100 disabled:pointer-events-none disabled:opacity-30 dark:text-gray-300 dark:hover:bg-gray-800"
                 aria-label="Página siguiente" @click="go(currentPage + 1)">
+                <span class="hidden sm:inline">Siguiente</span>
                 <ChevronRight class="h-4 w-4" />
             </button>
         </div>
-    </div>
+    </nav>
 </template>
