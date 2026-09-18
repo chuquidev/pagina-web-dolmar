@@ -27,18 +27,27 @@ const segments = computed(() => {
 </script>
 
 <template>
-    <div v-if="total > 0" class="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-        <svg viewBox="0 0 100 100" class="h-28 w-28 shrink-0 -rotate-90 sm:h-32 sm:w-32">
-            <circle cx="50" cy="50" r="40" fill="none" stroke-width="14" class="stroke-gray-100 dark:stroke-gray-800" />
-            <circle v-for="(segment, i) in segments" :key="i" cx="50" cy="50" r="40" fill="none" :stroke="segment.color"
-                stroke-width="14" :stroke-dasharray="segment.dasharray" :stroke-dashoffset="segment.dashoffset"
-                class="transition-all duration-500" />
-        </svg>
-        <ul class="w-full space-y-2 text-sm sm:w-auto">
-            <li v-for="(segment, i) in segments" :key="i" class="flex items-center gap-2">
-                <span class="h-2.5 w-2.5 shrink-0 rounded-full" :style="{ backgroundColor: segment.color }"></span>
+    <div v-if="total > 0" class="flex flex-col items-center gap-6 sm:flex-row sm:gap-10">
+        <div class="relative shrink-0">
+            <svg viewBox="0 0 100 100" class="h-44 w-44 -rotate-90 sm:h-52 sm:w-52">
+                <circle cx="50" cy="50" r="40" fill="none" stroke-width="12"
+                    class="stroke-gray-100 dark:stroke-gray-800" />
+                <circle v-for="(segment, i) in segments" :key="i" cx="50" cy="50" r="40" fill="none"
+                    :stroke="segment.color" stroke-width="12" stroke-linecap="round"
+                    :stroke-dasharray="segment.dasharray" :stroke-dashoffset="segment.dashoffset"
+                    class="transition-all duration-500" />
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="font-display text-3xl font-bold text-gray-900 dark:text-gray-100 sm:text-4xl">{{ total
+                }}</span>
+                <span class="text-xs text-gray-400 dark:text-gray-500">producto{{ total === 1 ? '' : 's' }}</span>
+            </div>
+        </div>
+        <ul class="w-full space-y-3 text-sm sm:w-auto">
+            <li v-for="(segment, i) in segments" :key="i" class="flex items-center gap-2.5">
+                <span class="h-3 w-3 shrink-0 rounded-full" :style="{ backgroundColor: segment.color }"></span>
                 <span class="text-gray-600 dark:text-gray-300">{{ segment.label }}</span>
-                <span class="font-medium text-gray-900 dark:text-gray-100">{{ segment.value }}</span>
+                <span class="font-semibold text-gray-900 dark:text-gray-100">{{ segment.value }}</span>
                 <span class="text-gray-400 dark:text-gray-500">({{ segment.percent }}%)</span>
             </li>
         </ul>
