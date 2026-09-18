@@ -13,3 +13,13 @@ html {
   /* Evita que el contenido "salte" al cambiar entre páginas con y sin scroll */
   scrollbar-gutter: stable;
 }
+
+/* Oculta la barra de scroll mantenimiento el desplazamiento (filtros en móvil, carruseles, etc.) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

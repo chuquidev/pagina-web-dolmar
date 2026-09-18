@@ -71,35 +71,43 @@ watch(() => route.query, loadProducts, { immediate: true, deep: true })
 
         <h1 class="font-display text-xl font-bold text-gray-900 dark:text-gray-100 sm:text-2xl">Catálogo</h1>
 
-        <div class="mt-5 flex flex-wrap items-center gap-2 sm:mt-6 sm:gap-3">
-            <select :value="route.query.category ?? ''"
-                class="rounded-full border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 sm:px-4"
-                @change="updateFilter({ category: ($event.target as HTMLSelectElement).value || undefined })">
-                <option value="">Todas las categorías</option>
-                <option v-for="c in catalogStore.categories" :key="c.id" :value="c.slug">{{ c.name }}</option>
-            </select>
+        <div class="relative mt-5 sm:mt-6">
+            <div
+                class="no-scrollbar -mx-4 flex flex-nowrap items-center gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:gap-3 sm:overflow-visible sm:px-0 sm:pb-0">
+                <select :value="route.query.category ?? ''"
+                    class="shrink-0 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 sm:px-4"
+                    @change="updateFilter({ category: ($event.target as HTMLSelectElement).value || undefined })">
+                    <option value="">Todas las categorías</option>
+                    <option v-for="c in catalogStore.categories" :key="c.id" :value="c.slug">{{ c.name }}</option>
+                </select>
 
-            <select :value="route.query.brand ?? ''"
-                class="rounded-full border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 sm:px-4"
-                @change="updateFilter({ brand: ($event.target as HTMLSelectElement).value || undefined })">
-                <option value="">Todas las marcas</option>
-                <option v-for="b in catalogStore.brands" :key="b.id" :value="b.slug">{{ b.name }}</option>
-            </select>
+                <select :value="route.query.brand ?? ''"
+                    class="shrink-0 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 sm:px-4"
+                    @change="updateFilter({ brand: ($event.target as HTMLSelectElement).value || undefined })">
+                    <option value="">Todas las marcas</option>
+                    <option v-for="b in catalogStore.brands" :key="b.id" :value="b.slug">{{ b.name }}</option>
+                </select>
 
-            <select :value="route.query.sort ?? 'newest'"
-                class="rounded-full border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 sm:px-4"
-                @change="updateFilter({ sort: ($event.target as HTMLSelectElement).value })">
-                <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-            </select>
+                <select :value="route.query.sort ?? 'newest'"
+                    class="shrink-0 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 sm:px-4"
+                    @change="updateFilter({ sort: ($event.target as HTMLSelectElement).value })">
+                    <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                </select>
 
-            <span v-if="route.query.search"
-                class="flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                "{{ route.query.search }}"
-                <button class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                    @click="updateFilter({ search: undefined })">
-                    <X class="h-3.5 w-3.5" />
-                </button>
-            </span>
+                <span v-if="route.query.search"
+                    class="flex shrink-0 items-center gap-2 rounded-full bg-gray-100 px-4 py-2 text-sm text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                    "{{ route.query.search }}"
+                    <button class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                        @click="updateFilter({ search: undefined })">
+                        <X class="h-3.5 w-3.5" />
+                    </button>
+                </span>
+            </div>
+
+            <!-- Degradado que insinúa que hay más filtros hacia la derecha (solo móvil) -->
+            <div
+                class="pointer-events-none absolute top-0 right-0 h-full w-8 bg-gradient-to-l from-white to-transparent dark:from-gray-950 sm:hidden">
+            </div>
         </div>
 
         <div v-if="loading" class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
