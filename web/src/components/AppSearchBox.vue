@@ -81,7 +81,7 @@ function submit() {
         <form class="flex items-center gap-2 rounded-full border border-gray-300 px-3 py-1.5 dark:border-gray-700"
             @submit.prevent="submit">
             <Search class="h-4 w-4 shrink-0 text-gray-400" />
-            <input v-model="query" type="search" placeholder="Buscar por nombre, categoría o marca..."
+            <input v-model="query" type="search" placeholder="Buscar..."
                 :autofocus="autofocus"
                 class="w-full bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400 dark:text-gray-100"
                 @input="onInput" @focus="open = true" />
