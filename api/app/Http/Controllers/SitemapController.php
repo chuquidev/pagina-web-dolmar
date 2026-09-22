@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
 
@@ -14,23 +13,17 @@ class SitemapController extends Controller
             $baseUrl = rtrim(config('app.frontend_url'), '/');
             $today = now()->toAtomString();
 
+            // /catalogo lleva noindex (solo la home debe aparecer en resultados),
+            // así que no va en el sitemap: listar ahí una URL que le decimos a
+            // Google que no indexe es una señal contradictoria. Las fichas de
+            // producto sí quedan, esas son las que queremos que aparezcan.
             $urls = collect([
                 ['loc' => $baseUrl, 'priority' => '1.0', 'changefreq' => 'daily', 'lastmod' => $today],
-                ['loc' => $baseUrl . '/catalogo', 'priority' => '0.9', 'changefreq' => 'daily', 'lastmod' => $today],
                 ['loc' => $baseUrl . '/nosotros', 'priority' => '0.5', 'changefreq' => 'monthly', 'lastmod' => $today],
                 ['loc' => $baseUrl . '/preguntas-frecuentes', 'priority' => '0.4', 'changefreq' => 'monthly', 'lastmod' => $today],
                 ['loc' => $baseUrl . '/guia-tallas', 'priority' => '0.4', 'changefreq' => 'monthly', 'lastmod' => $today],
                 ['loc' => $baseUrl . '/reservar-mantenimiento', 'priority' => '0.6', 'changefreq' => 'monthly', 'lastmod' => $today],
             ]);
-
-            foreach (Category::where('is_active', true)->get() as $category) {
-                $urls->push([
-                    'loc' => $baseUrl . '/catalogo?category=' . $category->slug,
-                    'priority' => '0.7',
-                    'changefreq' => 'daily',
-                    'lastmod' => $category->updated_at?->toAtomString() ?? $today,
-                ]);
-            }
 
             foreach (Product::where('is_active', true)->get() as $product) {
                 $urls->push([
