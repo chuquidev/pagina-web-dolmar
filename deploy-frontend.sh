@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-# --- Configuración: edita esto si algo cambia ---
+# --- Configuración ---
 VPS_USER="root"
 VPS_IP="104.248.4.70"
 VPS_PATH="/var/www/dolmarbikes-catalogo/web"
 LOCAL_WEB_DIR="web"
-# --------------------------------------------------
+# ----------------------
 
 echo "== 1/4: Compilando frontend =="
 cd "$LOCAL_WEB_DIR"
@@ -26,4 +26,4 @@ ssh "$VPS_USER@$VPS_IP" "
   find $VPS_PATH/dist -type f -exec chmod 644 {} \;
 "
 
-echo "✅ Listo — https://dolmarbike.com actualizado."
+echo "✅ Listo — dolmarbike.com actualizado."
